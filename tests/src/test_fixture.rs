@@ -32,11 +32,10 @@ pub struct TestFixture {
 }
 
 impl TestFixture {
-    pub const TOKEN_NAME: &'static str = "Wrapped Casper";
-    pub const TOKEN_SYMBOL: &'static str = "WCSPR";
+    pub const TOKEN_NAME: &'static str = "Casper Swap Staking";
+    pub const TOKEN_SYMBOL: &'static str = "CSWAP";
     pub const TOKEN_DECIMALS: u8 = 9;
-    // const TOKEN_TOTAL_SUPPLY_AS_U64: u64 = 0;
-
+    
     pub fn install_contract() -> TestFixture {
         println!("DEBUG MESSAGE: install contract");
         let ali = PublicKey::ed25519_from_bytes([3u8; 32]).unwrap();
