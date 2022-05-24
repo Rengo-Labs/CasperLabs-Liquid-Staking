@@ -53,8 +53,6 @@ impl TestFixture {
             consts::SYMBOL_RUNTIME_ARG_NAME => TestFixture::TOKEN_SYMBOL,
             consts::DECIMALS_RUNTIME_ARG_NAME => TestFixture::TOKEN_DECIMALS,
             consts::TOTAL_SUPPLY_RUNTIME_ARG_NAME => U256::from(0)
-            // consts::TOTAL_SUPPLY_RUNTIME_ARG_NAME => U256::from(TestFixture::TOKEN_TOTAL_SUPPLY_AS_U64)
-            // consts::TOTAL_SUPPLY_RUNTIME_ARG_NAME => TestFixture::token_total_supply()
         };
 
         let session = SessionBuilder::new(session_code, session_args)
@@ -110,7 +108,6 @@ impl TestFixture {
     }
 
     pub fn token_total_supply(&self) -> U256 {
-        // Self::TOKEN_TOTAL_SUPPLY_AS_U64.into()
         self.query_contract(consts::TOTAL_SUPPLY_RUNTIME_ARG_NAME)
             .unwrap()
     }
@@ -207,7 +204,7 @@ impl TestFixture {
             code,
             runtime_args! {
                 "cspr_amount" => cspr_amount,
-                "wcspr_contract_hash_key" => Key::from(self.contract_hash())
+                "cswap_hub_contract_hash_key" => Key::from(self.contract_hash())
             },
         )
         .with_address(address)
