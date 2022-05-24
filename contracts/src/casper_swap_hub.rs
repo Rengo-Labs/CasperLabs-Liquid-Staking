@@ -35,7 +35,7 @@ use casper_erc20::{
 };
 use casper_types::{CLValue, URef, U256, U512};
 
-const CONTRACT_KEY_NAME: &str = "wcspr_token";
+const CONTRACT_KEY_NAME: &str = "casper_swap_hub";
 
 #[no_mangle]
 pub extern "C" fn name() {
@@ -145,10 +145,10 @@ pub extern "C" fn withdraw() {
     let cspr_amount: U512 = runtime::get_named_arg("cspr_amount");
     let cspr_amount_u256: U256 = U256::from(cspr_amount.as_u128());
 
-    // Get account of the user who called the contract
+    // Get account of a staker who called the contract
     let sender = get_immediate_caller_address().unwrap_or_revert();
 
-    let balance = ERC20::default().balance_of(sender);
+    let balance: U256 = ERC20::default().balance_of(sender);
 
     let contract_main_purse = get_main_purse();
     let main_purse_balance: U512 =
@@ -165,13 +165,14 @@ pub extern "C" fn withdraw() {
         ERC20::default()
             .burn(sender, cspr_amount_u256)
             .unwrap_or_revert();
-    }
 
-    // Save cspr balance
-    set_key(
-        "cspr_balance",
-        system::get_purse_balance(contract_main_purse).unwrap_or_revert(),
-    );
+        let main_purse_balance_after: U512 =
+            system::get_purse_balance(contract_main_purse).unwrap_or_revert();
+        assert_eq!(main_purse_balance + cspr_amount, main_purse_balance_after);
+
+        // Update CSPR balance for Hub contract
+        set_key("cspr_balance", main_purse_balance_after,);
+    }
 }
 
 #[no_mangle]
