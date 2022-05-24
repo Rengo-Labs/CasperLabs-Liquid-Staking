@@ -1,4 +1,4 @@
-# CasperSwapStake
+# Casper Swap Staking
 ## Staking native CSPR to delegate for validators and utilize ERC20 token
 
 Staking protocol for Casper network native token CSPR.
