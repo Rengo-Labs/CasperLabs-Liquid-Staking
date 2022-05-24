@@ -176,18 +176,6 @@ pub extern "C" fn withdraw() {
 }
 
 #[no_mangle]
-pub extern "C" fn init() {
-    let value: Option<bool> = get_key("initialized");
-    match value {
-        Some(_) => {}
-        None => {
-            set_main_purse(system::create_purse());
-            set_key("initialized", true);
-        }
-    }
-}
-
-#[no_mangle]
 fn call() {
     let name: String = runtime::get_named_arg(NAME_RUNTIME_ARG_NAME);
     let symbol: String = runtime::get_named_arg(SYMBOL_RUNTIME_ARG_NAME);

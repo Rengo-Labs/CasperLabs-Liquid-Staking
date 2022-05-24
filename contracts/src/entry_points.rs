@@ -30,20 +30,9 @@ pub fn withdraw() -> EntryPoint {
     )
 }
 
-pub fn init() -> EntryPoint {
-    EntryPoint::new(
-        String::from("init"),
-        vec![],
-        CLType::Unit,
-        EntryPointAccess::Public,
-        EntryPointType::Contract,
-    )
-}
-
 pub fn default() -> EntryPoints {
     let mut contract_entry_points = entry_points::default();
     contract_entry_points.add_entry_point(deposit());
     contract_entry_points.add_entry_point(withdraw());
-    contract_entry_points.add_entry_point(init());
     contract_entry_points
 }
