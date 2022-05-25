@@ -35,7 +35,7 @@ use casper_types::{
     CLValue, URef, U256, U512
 };
 
-const CONTRACT_KEY_NAME: &str = "casper_swap_hub";
+const CONTRACT_KEY_NAME: &str = "liquid_staking_hub";
 
 #[no_mangle]
 pub extern "C" fn name() {

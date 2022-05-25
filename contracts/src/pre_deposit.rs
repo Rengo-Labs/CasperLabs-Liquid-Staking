@@ -32,7 +32,7 @@ fn call() {
     let cspr_amount_u256: U256 = U256::from(cspr_amount.as_u128());
 
     // Staking contract hash address passed as an argument to this contract
-    let wcspr_contract_key: Key = runtime::get_named_arg("cswap_hub_contract_hash_key");
+    let wcspr_contract_key: Key = runtime::get_named_arg("liquid_staking_hub_hash_key");
     let _wcspr_contract_hash: HashAddr = wcspr_contract_key.into_hash().unwrap_or_revert();
     let wcspr_contract_hash: ContractHash = ContractHash::new(_wcspr_contract_hash);
 

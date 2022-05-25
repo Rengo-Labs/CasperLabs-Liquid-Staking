@@ -10,8 +10,8 @@ use casper_types::{
     runtime_args, AsymmetricType, CLTyped, ContractHash, Key, PublicKey, RuntimeArgs, U256, U512,
 };
 
-const CONTRACT_CSWAP_HUB: &str = "casper_swap_hub.wasm";
-const CONTRACT_KEY_NAME: &str = "casper_swap_hub";
+const CONTRACT_CSWAP_HUB: &str = "liquid_staking_hub.wasm";
+const CONTRACT_KEY_NAME: &str = "liquid_staking_hub";
 
 const CONTRACT_PRE_DEPOSIT: &str = "pre_deposit.wasm";
 
@@ -32,8 +32,8 @@ pub struct TestFixture {
 }
 
 impl TestFixture {
-    pub const TOKEN_NAME: &'static str = "Casper Swap Staking";
-    pub const TOKEN_SYMBOL: &'static str = "CSWAP";
+    pub const TOKEN_NAME: &'static str = "Liquid Casper";
+    pub const TOKEN_SYMBOL: &'static str = "lCSPR";
     pub const TOKEN_DECIMALS: u8 = 9;
     
     pub fn install_contract() -> TestFixture {
@@ -204,7 +204,7 @@ impl TestFixture {
             code,
             runtime_args! {
                 "cspr_amount" => cspr_amount,
-                "cswap_hub_contract_hash_key" => Key::from(self.contract_hash())
+                "liquid_staking_hub_hash_key" => Key::from(self.contract_hash())
             },
         )
         .with_address(address)
