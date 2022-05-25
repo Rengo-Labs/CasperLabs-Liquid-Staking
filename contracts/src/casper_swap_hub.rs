@@ -16,10 +16,6 @@ use crate::helpers::set_key;
 use crate::helpers::set_main_purse;
 
 use alloc::string::String;
-use casper_types::ContractHash;
-use casper_types::HashAddr;
-use casper_types::Key;
-use casper_types::RuntimeArgs;
 
 use casper_contract::{
     contract_api::{runtime, system},
@@ -33,7 +29,11 @@ use casper_erc20::{
     },
     Address, ERC20,
 };
-use casper_types::{CLValue, URef, U256, U512};
+use casper_types::{
+    runtime_args, system::auction, PublicKey,
+    ContractHash, HashAddr, Key, RuntimeArgs,
+    CLValue, URef, U256, U512
+};
 
 const CONTRACT_KEY_NAME: &str = "casper_swap_hub";
 
@@ -173,6 +173,26 @@ pub extern "C" fn withdraw() {
         // Update CSPR balance for Hub contract
         set_key("cspr_balance", main_purse_balance_after,);
     }
+}
+
+fn delegate(delegator: PublicKey, validator: PublicKey, amount: U512) {
+    let contract_hash = system::get_auction();
+    let args = runtime_args! {
+        auction::ARG_DELEGATOR => delegator,
+        auction::ARG_VALIDATOR => validator,
+        auction::ARG_AMOUNT => amount,
+    };
+    runtime::call_contract::<U512>(contract_hash, auction::METHOD_DELEGATE, args);
+}
+
+fn undelegate(delegator: PublicKey, validator: PublicKey, amount: U512) {
+    let contract_hash = system::get_auction();
+    let args = runtime_args! {
+        auction::ARG_DELEGATOR => delegator,
+        auction::ARG_VALIDATOR => validator,
+        auction::ARG_AMOUNT => amount,
+    };
+    let _amount: U512 = runtime::call_contract(contract_hash, auction::METHOD_UNDELEGATE, args);
 }
 
 #[no_mangle]
