@@ -3,11 +3,11 @@ prepare:
 
 build-staking:
 	cd contracts && cargo build --release --target wasm32-unknown-unknown
-	wasm-strip contracts/target/wasm32-unknown-unknown/release/casper_swap_hub.wasm 2>/dev/null | true
+	wasm-strip contracts/target/wasm32-unknown-unknown/release/liquid_staking_hub.wasm 2>/dev/null | true
 
 test: build-staking
 	mkdir -p tests/wasm
-	cp contracts/target/wasm32-unknown-unknown/release/casper_swap_hub.wasm tests/wasm
+	cp contracts/target/wasm32-unknown-unknown/release/liquid_staking_hub.wasm tests/wasm
 	cp contracts/target/wasm32-unknown-unknown/release/pre_deposit.wasm tests/wasm
 	cp tests/wasm_artifacts/* tests/wasm
 	cd tests && cargo test -- --show-output
