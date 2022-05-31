@@ -1,9 +1,11 @@
 #![no_std]
 #![no_main]
-#![feature(default_alloc_error_handler)]
+
+/*#![feature(default_alloc_error_handler)]
 
 #[cfg(not(target_arch = "wasm32"))]
 compile_error!("target arch should be wasm32: compile with '--target wasm32-unknown-unknown'");
+*/
 
 extern crate alloc;
 
@@ -39,77 +41,12 @@ use casper_types::{
 
 const CONTRACT_KEY_NAME: &str = "liquid_staking_hub";
 
+/*
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
     loop {}
 }
-
-#[no_mangle]
-pub extern "C" fn name() {
-    let name = ERC20::default().name();
-    runtime::ret(CLValue::from_t(name).unwrap_or_revert());
-}
-
-#[no_mangle]
-pub extern "C" fn symbol() {
-    let symbol = ERC20::default().symbol();
-    runtime::ret(CLValue::from_t(symbol).unwrap_or_revert());
-}
-
-#[no_mangle]
-pub extern "C" fn decimals() {
-    let decimals = ERC20::default().decimals();
-    runtime::ret(CLValue::from_t(decimals).unwrap_or_revert());
-}
-
-#[no_mangle]
-pub extern "C" fn total_supply() {
-    let total_supply = ERC20::default().total_supply();
-    runtime::ret(CLValue::from_t(total_supply).unwrap_or_revert());
-}
-
-#[no_mangle]
-pub extern "C" fn balance_of() {
-    let address: Address = runtime::get_named_arg(ADDRESS_RUNTIME_ARG_NAME);
-    let balance = ERC20::default().balance_of(address);
-    runtime::ret(CLValue::from_t(balance).unwrap_or_revert());
-}
-
-#[no_mangle]
-pub extern "C" fn transfer() {
-    let recipient: Address = runtime::get_named_arg(RECIPIENT_RUNTIME_ARG_NAME);
-    let amount: U256 = runtime::get_named_arg(AMOUNT_RUNTIME_ARG_NAME);
-
-    ERC20::default()
-        .transfer(recipient, amount)
-        .unwrap_or_revert();
-}
-
-#[no_mangle]
-pub extern "C" fn approve() {
-    let spender: Address = runtime::get_named_arg(SPENDER_RUNTIME_ARG_NAME);
-    let amount: U256 = runtime::get_named_arg(AMOUNT_RUNTIME_ARG_NAME);
-
-    ERC20::default().approve(spender, amount).unwrap_or_revert();
-}
-
-#[no_mangle]
-pub extern "C" fn allowance() {
-    let owner: Address = runtime::get_named_arg(OWNER_RUNTIME_ARG_NAME);
-    let spender: Address = runtime::get_named_arg(SPENDER_RUNTIME_ARG_NAME);
-    let val = ERC20::default().allowance(owner, spender);
-    runtime::ret(CLValue::from_t(val).unwrap_or_revert());
-}
-
-#[no_mangle]
-pub extern "C" fn transfer_from() {
-    let owner: Address = runtime::get_named_arg(OWNER_RUNTIME_ARG_NAME);
-    let recipient: Address = runtime::get_named_arg(RECIPIENT_RUNTIME_ARG_NAME);
-    let amount: U256 = runtime::get_named_arg(AMOUNT_RUNTIME_ARG_NAME);
-    ERC20::default()
-        .transfer_from(owner, recipient, amount)
-        .unwrap_or_revert();
-}
+*/
 
 #[no_mangle]
 pub extern "C" fn deposit() {
@@ -202,6 +139,18 @@ fn undelegate(delegator: PublicKey, validator: PublicKey, amount: U512) {
         auction::ARG_AMOUNT => amount,
     };
     let _amount: U512 = runtime::call_contract(contract_hash, auction::METHOD_UNDELEGATE, args);
+}
+
+#[no_mangle]
+pub extern "C" fn init() {
+    let value: Option<bool> = get_key("initialized");
+    match value {
+        Some(_) => {}
+        None => {
+            set_main_purse(system::create_purse());
+            set_key("initialized", true);
+        }
+    }
 }
 
 #[no_mangle]
