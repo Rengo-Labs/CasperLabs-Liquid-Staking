@@ -17,6 +17,7 @@ use crate::helpers::set_key;
 // use crate::helpers::set_main_purse;
 
 use alloc::string::String;
+use core::panic::PanicInfo;
 
 use casper_contract::{
     contract_api::{runtime, system},
@@ -37,6 +38,11 @@ use casper_types::{
 };
 
 const CONTRACT_KEY_NAME: &str = "liquid_staking_hub";
+
+#[panic_handler]
+fn panic(_info: &PanicInfo) -> ! {
+    loop {}
+}
 
 #[no_mangle]
 pub extern "C" fn name() {

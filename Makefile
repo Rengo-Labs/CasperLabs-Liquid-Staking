@@ -1,7 +1,7 @@
 prepare:
 	rustup target add wasm32-unknown-unknown
 
-build-staking:
+build-staking: clean
 	cd contracts && cargo build --release --target wasm32-unknown-unknown
 	wasm-strip contracts/target/wasm32-unknown-unknown/release/liquid_staking_hub.wasm 2>/dev/null | true
 
