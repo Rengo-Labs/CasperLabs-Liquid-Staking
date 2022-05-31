@@ -8,6 +8,7 @@ use casper_contract::{
 
 use casper_types::RuntimeArgs;
 use casper_types::{runtime_args, ApiError, ContractHash, HashAddr, Key, URef, U256, U512};
+// use casper_types::U256;
 
 pub enum DepositError {
     ExceedUserLimit = 0,
