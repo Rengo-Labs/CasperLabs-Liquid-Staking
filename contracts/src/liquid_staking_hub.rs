@@ -10,10 +10,10 @@ mod entry_points;
 mod helpers;
 
 use crate::helpers::get_immediate_caller_address;
-use crate::helpers::get_key;
+// use crate::helpers::get_key;
 use crate::helpers::get_main_purse;
 use crate::helpers::set_key;
-use crate::helpers::set_main_purse;
+// use crate::helpers::set_main_purse;
 
 use alloc::string::String;
 
@@ -168,7 +168,7 @@ pub extern "C" fn withdraw() {
 
         let main_purse_balance_after: U512 =
             system::get_purse_balance(contract_main_purse).unwrap_or_revert();
-        assert_eq!(main_purse_balance + cspr_amount, main_purse_balance_after);
+        assert_eq!(main_purse_balance - cspr_amount, main_purse_balance_after);
 
         // Update CSPR balance for Hub contract
         set_key("cspr_balance", main_purse_balance_after,);

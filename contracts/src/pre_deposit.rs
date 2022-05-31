@@ -4,7 +4,7 @@ use casper_contract::{
     contract_api::{account, runtime, system},
     unwrap_or_revert::UnwrapOrRevert,
 };
-use casper_erc20::Address;
+// use casper_erc20::Address;
 
 use casper_types::RuntimeArgs;
 use casper_types::{runtime_args, ApiError, ContractHash, HashAddr, Key, URef, U256, U512};
@@ -29,7 +29,7 @@ fn call() {
 
     // CSPR tokens amount to transfer
     let cspr_amount: U512 = runtime::get_named_arg("cspr_amount");
-    let cspr_amount_u256: U256 = U256::from(cspr_amount.as_u128());
+    // let cspr_amount_u256: U256 = U256::from(cspr_amount.as_u128());
 
     // Staking contract hash address passed as an argument to this contract
     let wcspr_contract_key: Key = runtime::get_named_arg("liquid_staking_hub_hash_key");
@@ -37,7 +37,7 @@ fn call() {
     let wcspr_contract_hash: ContractHash = ContractHash::new(_wcspr_contract_hash);
 
     // Get Address (AccountHash) of the user who called the contract
-    let sender: Address = Address::from(runtime::get_caller());
+    // let sender: Address = Address::from(runtime::get_caller());
 
     // Purse with CSPR tokens of the user who call the contract
     let sender_purse: URef = account::get_main_purse();
