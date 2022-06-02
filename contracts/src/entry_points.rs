@@ -1,11 +1,12 @@
 use alloc::{string::String, vec};
 
-use casper_erc20::entry_points;
+// use casper_erc20::entry_points;
 
 use casper_types::{
     URef, U512, CLType, CLTyped, EntryPoint, EntryPointAccess, EntryPointType, EntryPoints, Parameter,
 };
 
+// "Liquid staking Hub" contract's entry points
 pub fn deposit() -> EntryPoint {
     EntryPoint::new(
         String::from("deposit"),
@@ -30,9 +31,10 @@ pub fn withdraw() -> EntryPoint {
     )
 }
 
-pub fn default() -> EntryPoints {
-    let mut contract_entry_points = entry_points::default();
-    contract_entry_points.add_entry_point(deposit());
-    contract_entry_points.add_entry_point(withdraw());
-    contract_entry_points
+pub fn hub_entry_points() -> EntryPoints {
+    // let mut contract_entry_points = entry_points::default();
+    let mut hub_entry_points = EntryPoints::new();
+    hub_entry_points.add_entry_point(deposit());
+    hub_entry_points.add_entry_point(withdraw());
+    hub_entry_points
 }

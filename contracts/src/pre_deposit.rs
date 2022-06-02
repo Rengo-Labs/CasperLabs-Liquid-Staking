@@ -24,6 +24,9 @@ impl From<DepositError> for ApiError {
 #[no_mangle]
 fn call() {
     
+    // TODO
+    // Clean unnnecessary lines
+    
     // This function is used to accept CSPR from the user and pass to the
     // Main contract that going to swap it to WCSPR
     // We need it because casper don't allow us to access `get_main_purse` from main contract

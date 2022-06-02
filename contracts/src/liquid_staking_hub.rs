@@ -41,7 +41,7 @@ use casper_erc20::{
 use casper_types::{
     runtime_args, system::auction, PublicKey,
     ContractHash, HashAddr, Key, RuntimeArgs,
-    CLValue, URef, U256, U512
+    CLValue, URef, U256, U512, EntryPoints
 };
 
 const CONTRACT_KEY_NAME: &str = "liquid_staking_hub";
@@ -186,6 +186,11 @@ fn call() {
         entry_points::default(),
     );
     */
+
+    let hub_entry_points: EntryPoints = entry_points::hub_entry_points();
+
+    // TODO
+    // Install custom upgradable contract
 
     let key: Key = runtime::get_key(CONTRACT_KEY_NAME).unwrap_or_revert();
     let hash: HashAddr = key.into_hash().unwrap_or_revert();
