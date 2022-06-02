@@ -221,6 +221,16 @@ pub extern "C" fn set_protocol_fee() {
 }
 
 #[no_mangle]
-fn _(delegator: PublicKey, validator: PublicKey, amount: U512) {
+pub extern "C" fn add_validator() {
+
+}
+
+#[no_mangle]
+pub extern "C" fn remove_validator() {
+
+}
+
+#[no_mangle]
+pub extern "C" fn set_manual_validator_fraction() {
 
 }
