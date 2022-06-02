@@ -29,6 +29,13 @@ bench = false
 doctest = false
 test = false
 
+[[bin]]
+name = "validators_list"
+path = "src/validators_list.rs"
+bench = false
+doctest = false
+test = false
+
 [profile.release]
 codegen-units = 1
 lto = true

@@ -12,11 +12,7 @@ extern crate alloc;
 mod entry_points;
 mod helpers;
 
-use crate::helpers::get_immediate_caller_address;
-use crate::helpers::get_key;
-use crate::helpers::get_main_purse;
-use crate::helpers::set_key;
-use crate::helpers::set_main_purse;
+use crate::helpers::{ get_immediate_caller_address, get_key, get_main_purse, set_key, set_main_purse };
 
 /* 
 use alloc::string::String;
@@ -190,7 +186,7 @@ fn call() {
     );
     */
 
-    let hub_entry_points: EntryPoints = entry_points::hub_entry_points();
+    let entry_points: EntryPoints = entry_points::hub_contract_entry_points();
 
     // TODO
     // Install custom upgradable contract
