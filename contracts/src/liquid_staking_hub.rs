@@ -157,6 +157,9 @@ fn undelegate(delegator: PublicKey, validator: PublicKey, amount: U512) {
     let _amount: U512 = runtime::call_contract(contract_hash, auction::METHOD_UNDELEGATE, args);
 }
 
+// TODO
+// Implement Access control
+// Only for "liquid_staking_hub"
 #[no_mangle]
 pub extern "C" fn init() {
     let value: Option<bool> = get_key("initialized");
@@ -199,5 +202,25 @@ fn call() {
     // "init" function call
     // To set main CSPR purse of "Hub" contract
     let _: () = runtime::call_contract(contract_hash, "init", RuntimeArgs::new());
+
+}
+
+// TODO
+// Implementation for next functions
+// Access control
+
+// Administrative functions
+#[no_mangle]
+pub extern "C" fn set_lock_period() {
+
+}
+
+#[no_mangle]
+pub extern "C" fn set_protocol_fee() {
+
+}
+
+#[no_mangle]
+fn _(delegator: PublicKey, validator: PublicKey, amount: U512) {
 
 }

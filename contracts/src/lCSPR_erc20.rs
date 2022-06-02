@@ -95,3 +95,7 @@ fn call() {
 
     let _token = ERC20::install(name, symbol, decimals, total_supply).unwrap_or_revert();
 }
+
+// TODO
+// Implemet access control for "mint" and "burn"
+// Being available only by "liquid_staking_hub"
