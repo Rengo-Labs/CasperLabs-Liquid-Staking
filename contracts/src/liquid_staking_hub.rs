@@ -13,18 +13,23 @@ mod entry_points;
 mod helpers;
 
 use crate::helpers::get_immediate_caller_address;
-// use crate::helpers::get_key;
+use crate::helpers::get_key;
 use crate::helpers::get_main_purse;
 use crate::helpers::set_key;
-// use crate::helpers::set_main_purse;
+use crate::helpers::set_main_purse;
 
+/* 
 use alloc::string::String;
 use core::panic::PanicInfo;
+*/
 
 use casper_contract::{
     contract_api::{runtime, system},
     unwrap_or_revert::UnwrapOrRevert,
 };
+
+// TODO
+// Filter out unnecessary constatns and types
 use casper_erc20::{
     constants::{
         ADDRESS_RUNTIME_ARG_NAME, AMOUNT_RUNTIME_ARG_NAME, DECIMALS_RUNTIME_ARG_NAME,
@@ -72,6 +77,9 @@ pub extern "C" fn deposit() {
     // Get account of the staker who called the contract
     let sender = get_immediate_caller_address().unwrap_or_revert();
 
+    // TODO
+    // Call "mint" function of ERC20
+
     // Issue CSWAP tokens to the staker
     ERC20::default()
         .mint(sender, cspr_amount_u256)
@@ -106,6 +114,10 @@ pub extern "C" fn withdraw() {
             None,
         )
         .unwrap_or_revert();
+        
+        // TODO
+        // Call "mint" function of ERC20
+    
         ERC20::default()
             .burn(sender, cspr_amount_u256)
             .unwrap_or_revert();
@@ -119,6 +131,8 @@ pub extern "C" fn withdraw() {
     }
 }
 
+// TODO
+// Adopt function to Protcol's structure
 #[no_mangle]
 fn delegate(delegator: PublicKey, validator: PublicKey, amount: U512) {
     let contract_hash = system::get_auction();
@@ -130,6 +144,8 @@ fn delegate(delegator: PublicKey, validator: PublicKey, amount: U512) {
     runtime::call_contract::<U512>(contract_hash, auction::METHOD_DELEGATE, args);
 }
 
+// TODO
+// Adopt function to Protcol's structure
 #[no_mangle]
 fn undelegate(delegator: PublicKey, validator: PublicKey, amount: U512) {
     let contract_hash = system::get_auction();
@@ -155,6 +171,7 @@ pub extern "C" fn init() {
 
 #[no_mangle]
 fn call() {
+    /*
     let name: String = runtime::get_named_arg(NAME_RUNTIME_ARG_NAME);
     let symbol: String = runtime::get_named_arg(SYMBOL_RUNTIME_ARG_NAME);
     let decimals = runtime::get_named_arg(DECIMALS_RUNTIME_ARG_NAME);
@@ -168,10 +185,14 @@ fn call() {
         CONTRACT_KEY_NAME,
         entry_points::default(),
     );
+    */
 
     let key: Key = runtime::get_key(CONTRACT_KEY_NAME).unwrap_or_revert();
     let hash: HashAddr = key.into_hash().unwrap_or_revert();
     let contract_hash = ContractHash::new(hash);
 
+    // "init" function call
+    // To set main CSPR purse of "Hub" contract
     let _: () = runtime::call_contract(contract_hash, "init", RuntimeArgs::new());
+
 }
