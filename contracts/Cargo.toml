@@ -22,6 +22,13 @@ bench = false
 doctest = false
 test = false
 
+[[bin]]
+name = "lcspr_erc20"
+path = "src/lcspr_erc20.rs"
+bench = false
+doctest = false
+test = false
+
 [profile.release]
 codegen-units = 1
 lto = true
