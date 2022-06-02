@@ -55,12 +55,25 @@ pub fn set_protocol_fee() -> EntryPoint {
     )
 }
 
+pub fn manual_reward_distribution() -> EntryPoint {
+    EntryPoint::new(
+        String::from("manual_reward_distribution"),
+        // TODO
+        // Update arguements
+        vec![],
+        CLType::Unit,
+        EntryPointAccess::Public,
+        EntryPointType::Contract,
+    )
+}
+
 pub fn hub_contract_entry_points() -> EntryPoints {
     let mut hub_entry_points = EntryPoints::new();
     hub_entry_points.add_entry_point(deposit());
     hub_entry_points.add_entry_point(withdraw());
     hub_entry_points.add_entry_point(set_protocol_fee());
     hub_entry_points.add_entry_point(set_lock_period());
+    hub_entry_points.add_entry_point(manual_reward_distribution());
     hub_entry_points
 }
 

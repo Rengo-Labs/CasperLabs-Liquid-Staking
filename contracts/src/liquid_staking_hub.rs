@@ -230,3 +230,13 @@ pub extern "C" fn remove_validator() {
 pub extern "C" fn set_manual_validator_fraction() {
 
 }
+
+#[no_mangle]
+pub extern "C" fn manual_reward_distribution() {
+
+}
+
+#[no_mangle]
+fn distribute_rewards() {
+    
+}
