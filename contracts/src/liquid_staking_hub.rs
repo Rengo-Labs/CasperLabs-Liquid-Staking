@@ -127,8 +127,6 @@ pub extern "C" fn withdraw() {
     }
 }
 
-// TODO
-// Adopt function to Protcol's structure
 #[no_mangle]
 fn delegate(delegator: PublicKey, validator: PublicKey, amount: U512) {
     let contract_hash = system::get_auction();
@@ -140,8 +138,6 @@ fn delegate(delegator: PublicKey, validator: PublicKey, amount: U512) {
     runtime::call_contract::<U512>(contract_hash, auction::METHOD_DELEGATE, args);
 }
 
-// TODO
-// Adopt function to Protcol's structure
 #[no_mangle]
 fn undelegate(delegator: PublicKey, validator: PublicKey, amount: U512) {
     let contract_hash = system::get_auction();
@@ -151,6 +147,24 @@ fn undelegate(delegator: PublicKey, validator: PublicKey, amount: U512) {
         auction::ARG_AMOUNT => amount,
     };
     let _amount: U512 = runtime::call_contract(contract_hash, auction::METHOD_UNDELEGATE, args);
+}
+
+#[no_mangle]
+fn call() {
+    
+    let entry_points: EntryPoints = entry_points::hub_contract_entry_points();
+
+    // TODO
+    // Install custom upgradable contract
+
+    let key: Key = runtime::get_key(CONTRACT_KEY_NAME).unwrap_or_revert();
+    let hash: HashAddr = key.into_hash().unwrap_or_revert();
+    let contract_hash = ContractHash::new(hash);
+
+    // "init" function call
+    // To set main CSPR purse of "Hub" contract
+    let _: () = runtime::call_contract(contract_hash, "init", RuntimeArgs::new());
+
 }
 
 // TODO
@@ -166,39 +180,6 @@ pub extern "C" fn init() {
             set_key("initialized", true);
         }
     }
-}
-
-#[no_mangle]
-fn call() {
-    /*
-    let name: String = runtime::get_named_arg(NAME_RUNTIME_ARG_NAME);
-    let symbol: String = runtime::get_named_arg(SYMBOL_RUNTIME_ARG_NAME);
-    let decimals = runtime::get_named_arg(DECIMALS_RUNTIME_ARG_NAME);
-    let initial_supply = runtime::get_named_arg(TOTAL_SUPPLY_RUNTIME_ARG_NAME);
-
-    let _ = ERC20::install_custom(
-        name,
-        symbol,
-        decimals,
-        initial_supply,
-        CONTRACT_KEY_NAME,
-        entry_points::default(),
-    );
-    */
-
-    let entry_points: EntryPoints = entry_points::hub_contract_entry_points();
-
-    // TODO
-    // Install custom upgradable contract
-
-    let key: Key = runtime::get_key(CONTRACT_KEY_NAME).unwrap_or_revert();
-    let hash: HashAddr = key.into_hash().unwrap_or_revert();
-    let contract_hash = ContractHash::new(hash);
-
-    // "init" function call
-    // To set main CSPR purse of "Hub" contract
-    let _: () = runtime::call_contract(contract_hash, "init", RuntimeArgs::new());
-
 }
 
 // TODO
@@ -217,12 +198,12 @@ pub extern "C" fn set_protocol_fee() {
 }
 
 #[no_mangle]
-pub extern "C" fn add_validator() {
+pub extern "C" fn add_whitelist_validators() {
 
 }
 
 #[no_mangle]
-pub extern "C" fn remove_validator() {
+pub extern "C" fn remove_whitelist_validators() {
 
 }
 

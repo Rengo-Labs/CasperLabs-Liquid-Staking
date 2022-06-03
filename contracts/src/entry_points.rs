@@ -78,9 +78,9 @@ pub fn hub_contract_entry_points() -> EntryPoints {
 }
 
 // "validators_list" entry points
-pub fn add_validator() -> EntryPoint {
+pub fn add_whitelist_validators() -> EntryPoint {
     EntryPoint::new(
-        String::from("add_validator"),
+        String::from("add_whitelist_validators"),
         // TODO
         // Update arguements
         vec![],
@@ -90,9 +90,9 @@ pub fn add_validator() -> EntryPoint {
     )
 }
 
-pub fn remove_validator() -> EntryPoint {
+pub fn remove_whitelist_validators() -> EntryPoint {
     EntryPoint::new(
-        String::from("remove_validator"),
+        String::from("remove_whitelist_validators"),
         // TODO
         // Update arguements
         vec![],
@@ -102,6 +102,7 @@ pub fn remove_validator() -> EntryPoint {
     )
 }
 
+/*
 pub fn set_manual_validator_fraction() -> EntryPoint {
     EntryPoint::new(
         String::from("set_manual_validator_fraction"),
@@ -113,11 +114,12 @@ pub fn set_manual_validator_fraction() -> EntryPoint {
         EntryPointType::Contract,
     )
 }
+*/
 
 pub fn validators_list_entry_points() -> EntryPoints {
     let mut hub_entry_points = EntryPoints::new();
-    hub_entry_points.add_entry_point(add_validator());
-    hub_entry_points.add_entry_point(remove_validator());
-    hub_entry_points.add_entry_point(set_manual_validator_fraction());
+    hub_entry_points.add_entry_point(add_whitelist_validators());
+    hub_entry_points.add_entry_point(remove_whitelist_validators());
+    // hub_entry_points.add_entry_point(set_manual_validator_fraction());
     hub_entry_points
 }

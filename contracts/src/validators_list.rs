@@ -36,8 +36,23 @@ fn call() {
 
 }
 
+// TODO
+// Access control: contract owner, DAO contract
 #[no_mangle]
-pub extern "C" fn add_validator() {
+pub extern "C" fn set_hub_contract(hub_contract_hash:ContractHash, hub_contract_package_hash:ContractPackageHash) {
+    let value: Option<bool> = get_key("hub_contract_connected");
+    match value {
+        Some(_) => {}
+        None => {
+            set_key("hub_contract_connected", true);
+            set_key("hub_contract_hash", hub_contract_hash);
+            set_key("hub_contract_package_hash", hub_contract_package_hash);
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn add_validators() {
 
 }
 
