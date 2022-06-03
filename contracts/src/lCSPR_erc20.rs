@@ -99,3 +99,18 @@ fn call() {
 // TODO
 // Implemet access control for "mint" and "burn"
 // Being available only by "liquid_staking_hub"
+
+// TODO
+// Access control: contract owner, DAO contract
+#[no_mangle]
+pub extern "C" fn set_hub_contract(hub_contract_hash:ContractHash, hub_contract_package_hash:ContractPackageHash) {
+    let value: Option<bool> = get_key("hub_contract_connected");
+    match value {
+        Some(_) => {}
+        None => {
+            set_key("hub_contract_connected", true);
+            set_key("hub_contract_hash", hub_contract_hash);
+            set_key("hub_contract_package_hash", hub_contract_package_hash);
+        }
+    }
+}

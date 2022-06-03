@@ -30,8 +30,8 @@ doctest = false
 test = false
 
 [[bin]]
-name = "validators_list"
-path = "src/validators_list.rs"
+name = "validators_whitelist"
+path = "src/validators_whitelist.rs"
 bench = false
 doctest = false
 test = false

@@ -3,16 +3,16 @@
 mod helpers;
 mod entry_points;
 
-use crate::data::{self, get_all_pairs, Pairs, Whitelists};
-use crate::alloc::string::ToString;
-use crate::data::{self, get_all_pairs, Pairs, Whitelists};
+use validators_whitelist::data::{self, get_all_pairs, Pairs, Whitelists};
+use validators_whitelist::alloc::string::ToString;
+use validators_whitelist::data::{self, get_all_pairs, Pairs, Whitelists};
 use alloc::collections::BTreeMap;
 use alloc::{string::String, vec::Vec};
 use casper_contract::contract_api::runtime;
 use casper_contract::contract_api::storage;
 use contract_utils::{ContractContext, ContractStorage};
 
-use crate::helpers::{ get_immediate_caller_address, get_key, get_main_purse, set_key, set_main_purse };
+use validators_whitelist::helpers::{ get_immediate_caller_address, get_key, get_main_purse, set_key, set_main_purse };
 
 use casper_contract::{
     contract_api::{runtime, system},
@@ -26,6 +26,8 @@ use casper_types::{
     ContractPackageHash, ApiError
 };
 
+const CONTRACT_KEY_NAME: &str = "validators_whitelist_liquid_casper";
+
 #[no_mangle]
 fn call() {
     
@@ -33,6 +35,14 @@ fn call() {
 
     // TODO
     // Install upgradable contract
+
+    let key: Key = runtime::get_key(CONTRACT_KEY_NAME).unwrap_or_revert();
+    let hash: HashAddr = key.into_hash().unwrap_or_revert();
+    let contract_hash = ContractHash::new(hash);
+
+    // "init" function call
+    // To set main CSPR purse of "Hub" contract
+    let _: () = runtime::call_contract(contract_hash, "init", RuntimeArgs::new());
 
 }
 
