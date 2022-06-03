@@ -75,7 +75,7 @@ pub fn call_stack_element_to_address(call_stack_element: CallStackElement) -> Ad
 ///
 /// This function ensures that only session code can execute this function, and disallows stored
 /// session/stored contracts.
-pub(crate) fn get_immediate_caller_address() -> Result<Address, Error> {
+pub(validators_whitelist) fn get_immediate_caller_address() -> Result<Address, Error> {
     get_immediate_call_stack_item()
         .map(call_stack_element_to_address)
         .ok_or(Error::InvalidContext)
