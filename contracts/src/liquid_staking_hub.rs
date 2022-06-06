@@ -26,21 +26,34 @@ use casper_contract::{
 
 // TODO
 // Filter out unnecessary constatns and types
+/*
 use casper_erc20::{
     constants::{
         ADDRESS_RUNTIME_ARG_NAME, AMOUNT_RUNTIME_ARG_NAME, DECIMALS_RUNTIME_ARG_NAME,
         NAME_RUNTIME_ARG_NAME, OWNER_RUNTIME_ARG_NAME, RECIPIENT_RUNTIME_ARG_NAME,
         SPENDER_RUNTIME_ARG_NAME, SYMBOL_RUNTIME_ARG_NAME, TOTAL_SUPPLY_RUNTIME_ARG_NAME,
     },
-    Address, ERC20,
+    Address, ERC20, Error,
 };
+*/
 use casper_types::{
     runtime_args, system::auction, PublicKey,
     ContractHash, HashAddr, Key, RuntimeArgs,
-    CLValue, URef, U256, U512, EntryPoints
+    CLValue, URef, U256, U512, EntryPoints,
+    Error
 };
 
 const CONTRACT_KEY_NAME: &str = "liquid_staking_hub";
+
+// Delegation / Undelegation argument's names
+const ARG_AMOUNT: &str = "amount";
+const ARG_VALIDATOR: &str = "validator";
+const ARG_DELEGATOR: &str = "delegator";
+
+/// Named constant for method `delegate`.
+const METHOD_DELEGATE: &str = "delegate";
+/// Named constant for method `undelegate`.
+const METHOD_UNDELEGATE: &str = "undelegate";
 
 /*
 #[panic_handler]
@@ -127,26 +140,48 @@ pub extern "C" fn withdraw() {
     }
 }
 
+// Function call:
+// delegate(delegator, validator, amount);
 #[no_mangle]
-fn delegate(delegator: PublicKey, validator: PublicKey, amount: U512) {
+fn delegate(delegator: PublicKey, validator: PublicKey, amount: U512) -> U512 {
     let contract_hash = system::get_auction();
     let args = runtime_args! {
         auction::ARG_DELEGATOR => delegator,
         auction::ARG_VALIDATOR => validator,
         auction::ARG_AMOUNT => amount,
     };
-    runtime::call_contract::<U512>(contract_hash, auction::METHOD_DELEGATE, args);
+    // Adds a new delegator to delegators or increases its current stake. If the target validator
+    // is missing, the function call returns an error and does nothing.
+    //
+    // The function transfers motes from the source purse to the delegator's bonding purse.
+    //
+    // This entry point returns the number of tokens currently delegated to a given validator.
+    let _amount: U512 = runtime::call_contract(contract_hash, METHOD_DELEGATE, args);
+
+    _amount
 }
 
+// Function call:
+// undelegate(delegator, validator, amount);
 #[no_mangle]
-fn undelegate(delegator: PublicKey, validator: PublicKey, amount: U512) {
+fn undelegate(delegator: PublicKey, validator: PublicKey, amount: U512) -> U512 {
     let contract_hash = system::get_auction();
     let args = runtime_args! {
         auction::ARG_DELEGATOR => delegator,
         auction::ARG_VALIDATOR => validator,
         auction::ARG_AMOUNT => amount,
     };
-    let _amount: U512 = runtime::call_contract(contract_hash, auction::METHOD_UNDELEGATE, args);
+    
+    // Removes specified amount of motes (or the value from the collection altogether, if the
+    // remaining amount is 0) from the entry in delegators map for given validator and creates a
+    // new unbonding request to the queue.
+    //
+    // The arguments are the delegator's key, the validator's key, and the amount.
+    //
+    // Returns the remaining bid amount after the stake was decreased.
+    let _amount: U512 = runtime::call_contract(contract_hash, METHOD_UNDELEGATE, args);
+    
+    _amount
 }
 
 #[no_mangle]
