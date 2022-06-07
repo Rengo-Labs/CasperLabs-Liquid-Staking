@@ -156,9 +156,9 @@ fn delegate(delegator: PublicKey, validator: PublicKey, amount: U512) -> U512 {
     // The function transfers motes from the source purse to the delegator's bonding purse.
     //
     // This entry point returns the number of tokens currently delegated to a given validator.
-    let _amount: U512 = runtime::call_contract(contract_hash, METHOD_DELEGATE, args);
+    let staked_amount: U512 = runtime::call_contract(contract_hash, METHOD_DELEGATE, args);
 
-    _amount
+    staked_amount
 }
 
 // Function call:
@@ -179,9 +179,9 @@ fn undelegate(delegator: PublicKey, validator: PublicKey, amount: U512) -> U512 
     // The arguments are the delegator's key, the validator's key, and the amount.
     //
     // Returns the remaining bid amount after the stake was decreased.
-    let _amount: U512 = runtime::call_contract(contract_hash, METHOD_UNDELEGATE, args);
+    let staked_amount: U512 = runtime::call_contract(contract_hash, METHOD_UNDELEGATE, args);
     
-    _amount
+    staked_amount
 }
 
 #[no_mangle]
