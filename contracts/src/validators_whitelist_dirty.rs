@@ -7,10 +7,14 @@ mod key_names;
 
 use casper_erc20::Error;
 use key_names::{VALIDATORS_WHITELIST_CONTRACT_KEY_NAME,};
+use std::any::type_name;
 
+use validators_whitelist::data::{self, get_all_pairs, Pairs, Whitelists};
+use validators_whitelist::alloc::string::ToString;
+use alloc::{{string::String, vec::Vec}, collections::BTreeMap};
 use casper_contract::contract_api::{runtime, storage};
 
-use helpers::{ get_immediate_caller_address, get_key, get_main_purse, set_key, set_main_purse };
+use validators_whitelist::helpers::{ get_immediate_caller_address, get_key, get_main_purse, set_key, set_main_purse };
 
 use casper_contract::{
     contract_api::{runtime, system},
@@ -27,7 +31,7 @@ use casper_types::{
 // TODO 
 // Adjust to Casper network
 // LIDO's mappings
-// pub static REGISTRY: Map<&[u8], Validator> = Map::new("validators_registry");
+pub static REGISTRY: Map<&[u8], Validator> = Map::new("validators_registry");
 
 pub struct Config {
     pub owner: ContractHash,
@@ -42,7 +46,7 @@ pub struct Validator {
 }
 
 impl Validator {
-
+    
 }
 
 // Mapping PublicKey -> Validator
@@ -51,6 +55,36 @@ pub struct ValidatorResponse {
     // #[serde(default)]
     pub total_delegated: U512,
     pub address: PublicKey
+}
+
+pub struct Whitelists {
+    dict: Dict,
+}
+
+impl Whitelists {
+    pub fn instance() -> Whitelists {
+        Whitelists {
+            dict: Dict::instance(WHITELISTS_DICT),
+        }
+    }
+
+    pub fn init() {
+        Dict::init(WHITELISTS_DICT)
+    }
+
+    pub fn get(&self, owner: &Key) -> Key {
+        match self.dict.get_by_key(owner) {
+            Some(whitelist) => whitelist,
+            None => Key::from_formatted_str(
+                "account-hash-0000000000000000000000000000000000000000000000000000000000000000",
+            )
+            .unwrap(),
+        }
+    }
+
+    pub fn set(&self, owner: &Key, value: Key) {
+        self.dict.set_by_key(owner, value);
+    }
 }
 
 #[no_mangle]
@@ -89,12 +123,7 @@ pub extern "C" fn update_config(hub_contract_public_key: PublicKey, hub_contract
 fn get_validator(validator: PublicKey) -> Option<Validator, Error> {
 
     // 
-    let _validator: Validator = {
-        validator,
-        U512(0),
-        U512(0),
-        u8(0)
-    };
+    let _validator: Validator();
 }
 
 #[no_mangle]
@@ -131,7 +160,89 @@ pub extern "C" fn get_validators_whitelist(validator: PublicKey) -> Validator {
 
 }
 
-// LIDO's Round Robin
+// Rengo uniswap "factory.rs" code
+// Pair interactions
+/*
+fn create_pair(&mut self, token_a: Key, token_b: Key, pair_hash: Key) {
+    let white_lists: Whitelists = Whitelists::instance();
+    let white_list_user: Key = white_lists.get(&self.get_caller());
+    if white_list_user
+        != Key::from_formatted_str(
+            "account-hash-0000000000000000000000000000000000000000000000000000000000000000",
+        )
+        .unwrap()
+    {
+        if token_a == token_b {
+            runtime::revert(Error::UniswapV2FactoryIdenticalAddresses);
+        }
+        let token0: Key;
+        let token1: Key;
+        let address_0: Key = Key::from_formatted_str(
+            "hash-0000000000000000000000000000000000000000000000000000000000000000",
+        )
+        .unwrap();
+        if token_a < token_b {
+            token0 = token_a;
+            token1 = token_b;
+        } else {
+            token0 = token_b;
+            token1 = token_a;
+        }
+        // in before 0 address was hash-0000000000000000000000000000000000000000000000000000000000000000
+        if token0 == address_0 {
+            runtime::revert(Error::UniswapV2FactoryZeroAddress);
+        }
+        let pair_0_1_key: Key = self.get_pair(token0, token1);
+        let pair_1_0_key: Key = self.get_pair(token1, token0);
+        if pair_0_1_key != address_0 {
+            runtime::revert(Error::UniswapV2FactoryPairExists);
+        }
+        if pair_1_0_key != address_0 {
+            runtime::revert(Error::UniswapV2FactoryPairExists);
+        }
+        //convert Key to ContractHash
+        let pair_hash_add_array = match pair_hash {
+            Key::Hash(package) => package,
+            _ => runtime::revert(ApiError::UnexpectedKeyVariant),
+        };
+        let pair_contract_hash = ContractHash::new(pair_hash_add_array);
+        let _ret: () = runtime::call_contract(
+            pair_contract_hash,
+            "initialize",
+            runtime_args! {"token0" => token0, "token1" => token1, "factory_hash" => data::get_hash() },
+        );
+        // handling the pair creation by updating the storage
+        self.set_pair(token0, token1, pair_hash);
+        self.set_pair(token1, token0, pair_hash);
+        let mut pairs: Vec<Key> = get_all_pairs();
+        pairs.push(pair_hash);
+        self.set_all_pairs(pairs);
+        self.emit(&FACTORYEvent::PairCreated {
+            token0: token0,
+            token1: token1,
+            pair: pair_hash,
+            all_pairs_length: (get_all_pairs().len()).into(),
+        });
+    } else {
+        runtime::revert(Error::UniswapV2FactoryNotInWhiteList);
+    }
+}
+
+fn get_pair(&mut self, token0: Key, token1: Key) -> Key {
+    Pairs::instance().get(&token0, &token1)
+}
+
+fn set_pair(&mut self, token0: Key, token1: Key, value: Key) {
+    Pairs::instance().set(&token0, &token1, value);
+}
+*/
+
+// LIDO Calculations:
+/*
+use crate::registry::ValidatorResponse;
+use cosmwasm_std::{StdError, StdResult, Uint128};
+use std::ops::Sub;
+*/
 pub fn calculate_delegations(
     mut amount_to_delegate: U512,
     validators: &[ValidatorResponse],
