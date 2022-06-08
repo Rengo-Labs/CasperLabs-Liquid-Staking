@@ -1,16 +1,18 @@
+#![no_std]
 #![no_main]
 
 mod helpers;
 mod entry_points;
+mod key_names;
+
+use casper_erc20::Error;
+use key_names::{VALIDATORS_WHITELIST_CONTRACT_KEY_NAME,};
+use std::any::type_name;
 
 use validators_whitelist::data::{self, get_all_pairs, Pairs, Whitelists};
 use validators_whitelist::alloc::string::ToString;
-use validators_whitelist::data::{self, get_all_pairs, Pairs, Whitelists};
-use alloc::collections::BTreeMap;
-use alloc::{string::String, vec::Vec};
-use casper_contract::contract_api::runtime;
-use casper_contract::contract_api::storage;
-use contract_utils::{ContractContext, ContractStorage};
+use alloc::{{string::String, vec::Vec}, collections::BTreeMap};
+use casper_contract::contract_api::{runtime, storage};
 
 use validators_whitelist::helpers::{ get_immediate_caller_address, get_key, get_main_purse, set_key, set_main_purse };
 
@@ -26,8 +28,6 @@ use casper_types::{
     ContractPackageHash, ApiError
 };
 
-const CONTRACT_KEY_NAME: &str = "validators_whitelist_liquid_casper";
-
 // TODO 
 // Adjust to Casper network
 // LIDO's mappings
@@ -38,12 +38,14 @@ pub struct Config {
     pub hub_contract_hash: ContractHash,
     pub hub_contract_package_hash: ContractPackageHash
 }
-
 pub struct Validator {
     pub address: PublicKey,
     pub total_delegated: U512,
-    pub undelegating_amount: U256
+    pub undelegating: U512,
+    pub lock_period: u8
 }
+
+// Mapping PublicKey -> Validator
 
 pub struct ValidatorResponse {
     // #[serde(default)]
@@ -84,12 +86,12 @@ impl Whitelists {
 #[no_mangle]
 fn call() {
     
-    let entry_points: EntryPoints = entry_points::validators_list_entry_points();
+    let entry_points: EntryPoints = entry_points::validators_whitelist_entry_points();
 
     // TODO
     // Install upgradable contract
 
-    let key: Key = runtime::get_key(CONTRACT_KEY_NAME).unwrap_or_revert();
+    let key: Key = runtime::get_key(VALIDATORS_WHITELIST_CONTRACT_KEY_NAME).unwrap_or_revert();
     let hash: HashAddr = key.into_hash().unwrap_or_revert();
     let contract_hash = ContractHash::new(hash);
 
@@ -101,9 +103,8 @@ fn call() {
 
 // TODO
 // Access control: contract owner, DAO contract
-// Unite into "Update_config" function
 #[no_mangle]
-pub extern "C" fn set_hub_contract(hub_contract_hash:ContractHash, hub_contract_package_hash:ContractPackageHash) {
+pub extern "C" fn update_config(hub_contract_public_key: PublicKey, hub_contract_hash:ContractHash, hub_contract_package_hash:ContractPackageHash) {
     let value: Option<bool> = get_key("hub_contract_connected");
     match value {
         Some(_) => {}
@@ -115,28 +116,45 @@ pub extern "C" fn set_hub_contract(hub_contract_hash:ContractHash, hub_contract_
     }
 }
 
+fn get_validator(validator: PublicKey) -> Option<Validator, Error> {
+
+    // 
+    let _validator: Validator();
+}
+
 #[no_mangle]
-pub extern "C" fn add_validators() {
+pub extern "C" fn add_validators(validator: PublicKey) {
+
+    // Check if Validator is already listed
+    // let mut _validator: Option<Validator, Error> = get_validator(validator);
+    // Return if it is
+    if type_of(get_validator(validator)) == PublicKey {
+
+    }
+
+    // Add validator to whitelist
 
 }
 
 #[no_mangle]
-pub extern "C" fn remove_validators() {
+pub extern "C" fn remove_validators(validator: PublicKey) -> Validator {
+
+    // Check Validator's "total_delegated" amount
+
+    // Undelegate "total_delegated" amount if total_delegated > 0
+
+    // Check Validator's "undelegating" amount and lock period
+
+    // Return Validator struct iff undelegating > 0
+
+    // Remove Validator from whitelist
 
 }
 
-// get_validators_for_delegation
-// get_whitelist_delegators
-
-// update_config
-// Update Owner and Hub_contract
-
-/*
 #[no_mangle]
-pub extern "C" fn set_manual_validator_fraction() {
+pub extern "C" fn get_validators_whitelist(validator: PublicKey) -> Validator {
 
 }
-*/
 
 // Rengo uniswap "factory.rs" code
 // Pair interactions
@@ -222,7 +240,7 @@ use cosmwasm_std::{StdError, StdResult, Uint128};
 use std::ops::Sub;
 */
 pub fn calculate_delegations(
-    mut amount_to_delegate: Uint128,
+    mut amount_to_delegate: U512,
     validators: &[ValidatorResponse],
 ) -> StdResult<(Uint128, Vec<Uint128>)> {
     if validators.is_empty() {
