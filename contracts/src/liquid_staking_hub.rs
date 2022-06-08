@@ -43,24 +43,17 @@ use casper_types::{
     Error
 };
 
-const CONTRACT_KEY_NAME: &str = "liquid_staking_hub";
+const CONTRACT_KEY_NAME: &str = "liquid_staking_hub_contract";
 
-// Delegation / Undelegation argument's names
+// Named constants for Delegation / Undelegation arguments
 const ARG_AMOUNT: &str = "amount";
 const ARG_VALIDATOR: &str = "validator";
 const ARG_DELEGATOR: &str = "delegator";
 
-/// Named constant for method `delegate`.
+// Named constant for method `delegate`.
 const METHOD_DELEGATE: &str = "delegate";
-/// Named constant for method `undelegate`.
+// Named constant for method `undelegate`.
 const METHOD_UNDELEGATE: &str = "undelegate";
-
-/*
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    loop {}
-}
-*/
 
 #[no_mangle]
 pub extern "C" fn deposit() {

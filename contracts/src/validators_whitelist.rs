@@ -28,23 +28,57 @@ use casper_types::{
 
 const CONTRACT_KEY_NAME: &str = "validators_whitelist_liquid_casper";
 
-// LIDO's mapping
+// TODO 
+// Adjust to Casper network
+// LIDO's mappings
 pub static REGISTRY: Map<&[u8], Validator> = Map::new("validators_registry");
 
 pub struct Config {
-    pub owner: CanonicalAddr,
-    pub hub_contract: CanonicalAddr,
+    pub owner: ContractHash,
+    pub hub_contract_hash: ContractHash,
+    pub hub_contract_package_hash: ContractPackageHash
 }
 
 pub struct Validator {
-    pub address: String,
+    pub address: PublicKey,
+    pub total_delegated: U512,
+    pub undelegating_amount: U256
 }
 
 pub struct ValidatorResponse {
-    #[serde(default)]
-    pub total_delegated: Uint128,
+    // #[serde(default)]
+    pub total_delegated: U512,
+    pub address: PublicKey
+}
 
-    pub address: String,
+pub struct Whitelists {
+    dict: Dict,
+}
+
+impl Whitelists {
+    pub fn instance() -> Whitelists {
+        Whitelists {
+            dict: Dict::instance(WHITELISTS_DICT),
+        }
+    }
+
+    pub fn init() {
+        Dict::init(WHITELISTS_DICT)
+    }
+
+    pub fn get(&self, owner: &Key) -> Key {
+        match self.dict.get_by_key(owner) {
+            Some(whitelist) => whitelist,
+            None => Key::from_formatted_str(
+                "account-hash-0000000000000000000000000000000000000000000000000000000000000000",
+            )
+            .unwrap(),
+        }
+    }
+
+    pub fn set(&self, owner: &Key, value: Key) {
+        self.dict.set_by_key(owner, value);
+    }
 }
 
 #[no_mangle]
@@ -105,6 +139,8 @@ pub extern "C" fn set_manual_validator_fraction() {
 */
 
 // Rengo uniswap "factory.rs" code
+// Pair interactions
+/*
 fn create_pair(&mut self, token_a: Key, token_b: Key, pair_hash: Key) {
     let white_lists: Whitelists = Whitelists::instance();
     let white_list_user: Key = white_lists.get(&self.get_caller());
@@ -177,6 +213,7 @@ fn get_pair(&mut self, token0: Key, token1: Key) -> Key {
 fn set_pair(&mut self, token0: Key, token1: Key, value: Key) {
     Pairs::instance().set(&token0, &token1, value);
 }
+*/
 
 // LIDO Calculations:
 /*
