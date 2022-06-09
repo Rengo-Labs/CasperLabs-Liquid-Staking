@@ -2,9 +2,9 @@
 
 pub const VALIDATORS_WHITELIST_CONTRACT_KEY_NAME: &str = "validators_whitelist_liquid_casper";
 
-pub const VALIDATORS_WHITELIST_HASH_NAME: &str = "validators_whitelist_hash_name";
+pub const VALIDATORS_WHITELIST_HASH_NAME: &str = "validators_whitelist_hash";
 
-pub const VALIDATORS_WHITELIST_UREF_NAME: &str = "validators_whitelist_uref_name";
+pub const VALIDATORS_WHITELIST_UREF_NAME: &str = "validators_whitelist_uref";
 
 /// Named keys
 
@@ -34,3 +34,5 @@ pub const LIQUID_STAKING_HUB_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME:  &str = "li
 pub const DAO_CONTRACT_HASH_RUNTIME_ARG_NAME:  &str = "dao_contract_hash";
 
 pub const DAO_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME:  &str = "dao_contract_package_hash";
+
+pub const VALIDATOR_TO_WHITELIST_ARG_NAME:  &str = "validator_to_whitelist";

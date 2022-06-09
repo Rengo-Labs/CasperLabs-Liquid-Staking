@@ -77,7 +77,7 @@ pub fn hub_contract_entry_points() -> EntryPoints {
     hub_entry_points
 }
 
-/// Validators whitelist
+/// Validators whitelist contract
 
 pub fn add_validators() -> EntryPoint {
     EntryPoint::new(
@@ -115,10 +115,23 @@ pub fn update_config() -> EntryPoint {
     )
 }
 
+pub fn initialize_contract() -> EntryPoint {
+    EntryPoint::new(
+        String::from("initialize_contract"),
+        // TODO
+        // Update arguements
+        vec![],
+        CLType::Unit,
+        EntryPointAccess::Public,
+        EntryPointType::Contract,
+    )
+}
+
 pub fn validators_whitelist_entry_points() -> EntryPoints {
     let mut hub_entry_points = EntryPoints::new();
     hub_entry_points.add_entry_point(add_validators());
     hub_entry_points.add_entry_point(remove_validators());
     hub_entry_points.add_entry_point(update_config());
+    hub_entry_points.add_entry_point(initialize_contract());
     hub_entry_points
 }
