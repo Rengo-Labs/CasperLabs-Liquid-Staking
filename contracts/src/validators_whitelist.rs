@@ -6,7 +6,13 @@ mod entry_points;
 mod key_names;
 
 use casper_erc20::Error;
-use key_names::{VALIDATORS_WHITELIST_CONTRACT_KEY_NAME,};
+use key_names::{
+    VALIDATORS_WHITELIST_CONTRACT_KEY_NAME, VALIDATORS_WHITELIST_DICTIONARY_KEY_NAME,
+    VALIDATORS_UNSTAKE_DICTIONARY_KEY_NAME, LIQUID_STAKING_HUB_CONTRACT_HASH_RUNTIME_ARG_NAME,
+    LIQUID_STAKING_HUB_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME, DAO_CONTRACT_HASH_RUNTIME_ARG_NAME,
+    DAO_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME, VALIDATORS_WHITELIST_UREF_NAME,
+    VALIDATORS_WHITELIST_HASH_NAME, 
+};
 
 use casper_contract::contract_api::{runtime, storage};
 
@@ -21,7 +27,7 @@ use casper_types::{
     runtime_args, system::auction, PublicKey,
     ContractHash, HashAddr, Key, RuntimeArgs,
     CLValue, URef, U256, U512, EntryPoints,
-    ContractPackageHash, ApiError
+    ContractPackageHash, ApiError, contracts::NamedKeys
 };
 
 // TODO 
@@ -45,8 +51,6 @@ impl Validator {
 
 }
 
-// Mapping PublicKey -> Validator
-
 pub struct ValidatorResponse {
     // #[serde(default)]
     pub total_delegated: U512,
@@ -56,10 +60,19 @@ pub struct ValidatorResponse {
 #[no_mangle]
 fn call() {
     
+    let liquid_staking_hub_contract_hash: ContractHash = runtime::get_named_arg(LIQUID_STAKING_HUB_CONTRACT_HASH_RUNTIME_ARG_NAME);
+    let liquid_staking_hub_contract_package_hash: ContractPackageHash = runtime::get_named_arg(LIQUID_STAKING_HUB_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME);
+    let dao_contract_hash: ContractHash = runtime::get_named_arg(DAO_CONTRACT_HASH_RUNTIME_ARG_NAME);
+    let dao_contract_package_hash: ContractPackageHash = runtime::get_named_arg(DAO_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME);
+    
     let entry_points: EntryPoints = entry_points::validators_whitelist_entry_points();
 
     // TODO
+    // Create named keys
+    let named_keys: NamedKeys = NamedKeys();
+
     // Install upgradable contract
+    storage::new_contract(entry_points, named_keys, VALIDATORS_WHITELIST_HASH_NAME, VALIDATORS_WHITELIST_UREF_NAME);
 
     let key: Key = runtime::get_key(VALIDATORS_WHITELIST_CONTRACT_KEY_NAME).unwrap_or_revert();
     let hash: HashAddr = key.into_hash().unwrap_or_revert();
@@ -68,6 +81,45 @@ fn call() {
     // "init" function call
     // To set main CSPR purse of "Hub" contract
     let _: () = runtime::call_contract(contract_hash, "init", RuntimeArgs::new());
+
+}
+
+/// Create a new contract stored under a Key::Hash at version 1. You may upgrade this contract in
+/// the future;
+/// if `named_keys` are provided, will apply them
+/// if `hash_name` is provided, puts contract hash in current context's named keys under `hash_name`
+/// if `uref_name` is provided, puts access_uref in current context's named keys under `uref_name`
+pub fn new_contract(
+    entry_points: EntryPoints,
+    named_keys: Option<NamedKeys>,
+    hash_name: Option<String>,
+    uref_name: Option<String>,
+) -> (ContractHash, ContractVersion) {
+    create_contract(entry_points, named_keys, hash_name, uref_name, false)
+}
+
+#[no_mangle]
+pub extern "C" fn init() {
+    
+    let value: Option<bool> = get_key("initialized");
+    match value {
+        Some(_) => {}
+        None => {
+            
+            set_key("initialized", true);
+
+            // TODO
+            // Create NamedKeys
+            // Check deep ERC20 contract installation
+
+            // Mapping PublicKey -> Validator
+            // Create a dictionary track the mapping of account hashes to Validator structure.
+            storage::new_dictionary(VALIDATORS_WHITELIST_DICTIONARY_KEY_NAME).unwrap_or_revert();
+
+            // Create a dictionary track the mapping of "Validator structure" to unstaking period / amount
+            storage::new_dictionary(VALIDATORS_UNSTAKE_DICTIONARY_KEY_NAME).unwrap_or_revert();
+        }
+    }
 
 }
 
