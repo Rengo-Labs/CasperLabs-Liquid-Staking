@@ -3,15 +3,15 @@
 
 mod helpers;
 mod entry_points;
-mod key_names;
+mod constants;
 
 use casper_erc20::Error;
-use key_names::{
+use constants::{
     VALIDATORS_WHITELIST_CONTRACT_KEY_NAME, VALIDATORS_WHITELIST_DICTIONARY_KEY_NAME,
     VALIDATORS_UNSTAKE_DICTIONARY_KEY_NAME, LIQUID_STAKING_HUB_CONTRACT_HASH_RUNTIME_ARG_NAME,
     LIQUID_STAKING_HUB_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME, DAO_CONTRACT_HASH_RUNTIME_ARG_NAME,
     DAO_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME, VALIDATORS_WHITELIST_UREF_NAME,
-    VALIDATORS_WHITELIST_HASH_NAME, VALIDATOR_TO_WHITELIST_ARG_NAME, 
+    VALIDATORS_WHITELIST_HASH_NAME, VALIDATOR_TO_WHITELIST_ARG_NAME, OWNER, 
 };
 
 use casper_contract::contract_api::{runtime, storage};
@@ -30,17 +30,12 @@ use casper_types::{
     ContractPackageHash, ApiError, contracts::NamedKeys
 };
 
+use contract_utils::{ AdminControl, ContractContext, ContractStorage, Dict };
+
 // TODO 
 // Adjust to Casper network
 // LIDO's mappings
 // pub static REGISTRY: Map<&[u8], Validator> = Map::new("validators_registry");
-
-// Whitelist from uniswap-casper-core by Rengo-labs
-pub struct Whitelists {
-    dict: Dict,
-}
-
-
 
 pub struct Config {
     pub owner: ContractHash,

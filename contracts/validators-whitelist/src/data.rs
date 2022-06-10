@@ -1,16 +1,21 @@
+mod constants;
+
 use alloc::vec::Vec;
 use casper_contract::unwrap_or_revert::UnwrapOrRevert;
 use casper_types::{ContractPackageHash, Key};
 use contract_utils::{get_key, set_key, Dict};
+use constants::{
+    VALIDATORS_WHITELIST_DICTIONARY_KEY_NAME, VALIDATORS_UNSTAKE_LIST_DICTIONARY_KEY_NAME,
+    VALIDATORS_WHITELIST_HASH_NAME, VALIDATORS_WHITELIST_PACKAGE_HASH_NAME, OWNER, 
+};
 
-pub const WHITELISTS_DICT: &str = "white_lists";
-pub const PAIRS_DICT: &str = "pairs";
-pub const SELF_CONTRACT_HASH: &str = "self_contract_hash";
+// VALIDATORS_UNSTAKE_LIST_DICTIONARY_KEY_NAME
+
 pub const FEE_TO: &str = "fee_to";
 pub const FEE_TO_SETTER: &str = "fee_to_setter";
 pub const ALL_PAIRS: &str = "all_pairs";
-pub const OWNER: &str = "owner";
-pub const CONTRACT_PACKAGE_HASH: &str = "contract_package_hash";
+
+
 
 pub struct Whitelists {
     dict: Dict,
@@ -19,12 +24,12 @@ pub struct Whitelists {
 impl Whitelists {
     pub fn instance() -> Whitelists {
         Whitelists {
-            dict: Dict::instance(WHITELISTS_DICT),
+            dict: Dict::instance(VALIDATORS_WHITELIST_DICTIONARY_KEY_NAME),
         }
     }
 
     pub fn init() {
-        Dict::init(WHITELISTS_DICT)
+        Dict::init(VALIDATORS_WHITELIST_DICTIONARY_KEY_NAME)
     }
 
     pub fn get(&self, owner: &Key) -> Key {
@@ -48,12 +53,12 @@ pub struct Pairs {
 impl Pairs {
     pub fn instance() -> Pairs {
         Pairs {
-            dict: Dict::instance(PAIRS_DICT),
+            dict: Dict::instance(VALIDATORS_UNSTAKE_LIST_DICTIONARY_KEY_NAME),
         }
     }
 
     pub fn init() {
-        Dict::init(PAIRS_DICT)
+        Dict::init(VALIDATORS_UNSTAKE_LIST_DICTIONARY_KEY_NAME)
     }
 
     pub fn get(&self, token0: &Key, token1: &Key) -> Key {
@@ -72,11 +77,11 @@ impl Pairs {
 }
 
 pub fn set_hash(contract_hash: Key) {
-    set_key(SELF_CONTRACT_HASH, contract_hash);
+    set_key(VALIDATORS_WHITELIST_HASH_NAME, contract_hash);
 }
 
 pub fn get_hash() -> Key {
-    get_key(SELF_CONTRACT_HASH).unwrap_or_revert()
+    get_key(VALIDATORS_WHITELIST_HASH_NAME).unwrap_or_revert()
 }
 
 pub fn set_fee_to(fee_to: Key) {
@@ -107,20 +112,12 @@ pub fn get_fee_to_setter() -> Key {
     }
 }
 
-pub fn set_all_pairs(all_pairs: Vec<Key>) {
-    set_key(ALL_PAIRS, all_pairs);
-}
-
-pub fn get_all_pairs() -> Vec<Key> {
-    get_key(ALL_PAIRS).unwrap_or_revert()
-}
-
 pub fn set_package_hash(package_hash: ContractPackageHash) {
-    set_key(CONTRACT_PACKAGE_HASH, package_hash);
+    set_key(VALIDATORS_WHITELIST_PACKAGE_HASH_NAME, package_hash);
 }
 
 pub fn get_package_hash() -> ContractPackageHash {
-    get_key(CONTRACT_PACKAGE_HASH).unwrap_or_revert()
+    get_key(VALIDATORS_WHITELIST_PACKAGE_HASH_NAME).unwrap_or_revert()
 }
 
 pub fn set_owner(owner: Key) {
@@ -136,3 +133,13 @@ pub fn get_owner() -> Key {
         .unwrap(),
     }
 }
+
+/*
+pub fn set_all_pairs(all_pairs: Vec<Key>) {
+    set_key(ALL_PAIRS, all_pairs);
+}
+
+pub fn get_all_pairs() -> Vec<Key> {
+    get_key(ALL_PAIRS).unwrap_or_revert()
+}
+*/
