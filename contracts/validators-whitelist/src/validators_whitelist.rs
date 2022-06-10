@@ -30,12 +30,13 @@ pub struct ValidatorResponse {
 fn call() {
     
     // Runtime arguments
-    let liquid_staking_hub_contract_hash: ContractHash = runtime::get_named_arg(LIQUID_STAKING_HUB_CONTRACT_HASH_RUNTIME_ARG_NAME);
+    let liquid_staking_hub_contract_hash: ContractHash = runtime::get_named_arg(LIQUID_STAKING_HUB_HASH_RUNTIME_ARG_NAME);
     let liquid_staking_hub_contract_package_hash: ContractPackageHash = runtime::get_named_arg(LIQUID_STAKING_HUB_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME);
     let dao_contract_hash: ContractHash = runtime::get_named_arg(DAO_CONTRACT_HASH_RUNTIME_ARG_NAME);
     let dao_contract_package_hash: ContractPackageHash = runtime::get_named_arg(DAO_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME);
 
-    let validator_to_whitelist: PublicKey = runtime::get_named_arg(VALIDATOR_TO_WHITELIST_ARG_NAME);
+    let validators_to_whitelist: Vec<PublicKey> = runtime::get_named_arg(VALIDATORS_TO_WHITELIST_ARG_NAME);
+    let admins_to_set: Vec<Key> = runtime::get_named_arg(ADMINS_TO_SET_ARG_NAME);
     
     // Entry points
     let entry_points: EntryPoints = entry_points::validators_whitelist_entry_points();
