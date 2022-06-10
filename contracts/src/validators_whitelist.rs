@@ -35,6 +35,13 @@ use casper_types::{
 // LIDO's mappings
 // pub static REGISTRY: Map<&[u8], Validator> = Map::new("validators_registry");
 
+// Whitelist from uniswap-casper-core by Rengo-labs
+pub struct Whitelists {
+    dict: Dict,
+}
+
+
+
 pub struct Config {
     pub owner: ContractHash,
     pub hub_contract_hash: ContractHash,
@@ -42,9 +49,10 @@ pub struct Config {
 }
 pub struct Validator {
     pub address: PublicKey,
+    pub whitelisted: bool,
     pub total_delegated: U512,
     pub undelegating: U512,
-    pub lock_period: u8
+    pub unlock_deadline: u8
 }
 
 impl Validator {

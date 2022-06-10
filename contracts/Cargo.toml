@@ -7,6 +7,7 @@ edition = "2018"
 casper-contract = "1.4.4"
 casper-erc20 = { git = "https://github.com/casper-ecosystem/erc20" }
 casper-types = "1.5.0"
+contract-utils = {path = "../utils/contract-utils"}
 
 [[bin]]
 name = "liquid_staking_hub"
