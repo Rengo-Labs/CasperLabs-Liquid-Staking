@@ -24,18 +24,13 @@ pub const ADD_VALIDATORS_ENTRY_POINT_NAME:  &str = "add_validators";
 
 pub const REMOVE_VALIDATORS_ENTRY_POINT_NAME:  &str = "remove_validators";
 
-// pub const SET_HUB_CONTRACT_ENTRY_POINT_NAME:  &str = "set_hub_contract";
-
-// pub const SET_DAO_CONTRACT_ENTRY_POINT_NAME:  &str = "set_dao_contract";
 pub const UPDATE_CONFIG_ENTRY_POINT_NAME:  &str = "update_config";
 
 pub const INITIALIZE_CONTRACT_ENTRY_POINT_NAME:  &str = "initialize_contract";
 
-// Hub contract
+// pub const SET_HUB_CONTRACT_ENTRY_POINT_NAME:  &str = "set_hub_contract";
 
-
-
-//
+// pub const SET_DAO_CONTRACT_ENTRY_POINT_NAME:  &str = "set_dao_contract";
 
 /// Runtime argument names
 
