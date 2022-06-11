@@ -32,8 +32,8 @@ fn call() {
     // Runtime arguments
     let liquid_staking_hub_contract_hash: ContractHash = runtime::get_named_arg(LIQUID_STAKING_HUB_HASH_RUNTIME_ARG_NAME);
     let liquid_staking_hub_contract_package_hash: ContractPackageHash = runtime::get_named_arg(LIQUID_STAKING_HUB_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME);
-    let dao_contract_hash: ContractHash = runtime::get_named_arg(DAO_CONTRACT_HASH_RUNTIME_ARG_NAME);
-    let dao_contract_package_hash: ContractPackageHash = runtime::get_named_arg(DAO_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME);
+    // let dao_contract_hash: ContractHash = runtime::get_named_arg(DAO_CONTRACT_HASH_RUNTIME_ARG_NAME);
+    // let dao_contract_package_hash: ContractPackageHash = runtime::get_named_arg(DAO_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME);
 
     let validators_to_whitelist: Vec<PublicKey> = runtime::get_named_arg(VALIDATORS_TO_WHITELIST_ARG_NAME);
     let admins_to_set: Vec<Key> = runtime::get_named_arg(ADMINS_TO_SET_ARG_NAME);
@@ -41,12 +41,16 @@ fn call() {
     // Entry points
     let entry_points: EntryPoints = entry_points::validators_whitelist_entry_points();
 
-    // TODO
     // Named keys
-    let named_keys: NamedKeys = NamedKeys();
+    let named_keys: NamedKeys = named_keys::default(
+        liquid_staking_hub_contract_hash,
+        liquid_staking_hub_contract_package_hash,
+        // TODO
+        // Add necessary NamedKeys
+    );
 
     // Install upgradable contract
-    storage::new_contract(entry_points, named_keys, VALIDATORS_WHITELIST_HASH_NAME, VALIDATORS_WHITELIST_UREF_NAME);
+    let (contract_hash, contract_version) = storage::new_contract(entry_points, named_keys, VALIDATORS_WHITELIST_HASH_NAME, VALIDATORS_WHITELIST_UREF_NAME);
 
     let key: Key = runtime::get_key(VALIDATORS_WHITELIST_CONTRACT_KEY_NAME).unwrap_or_revert();
     let hash: HashAddr = key.into_hash().unwrap_or_revert();
@@ -158,7 +162,7 @@ pub extern "C" fn get_validators_whitelist(validator: PublicKey) -> Validator {
 pub fn calculate_delegations(
     mut amount_to_delegate: U512,
     validators: &[ValidatorResponse],
-) -> StdResult<(Uint128, Vec<Uint128>)> {
+) -> Result<(U512, Vec<U512>)> {
     if validators.is_empty() {
         return Err(StdError::generic_err("Empty validators set"));
     }

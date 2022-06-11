@@ -40,20 +40,12 @@ impl Dict {
         self.get(&key_to_str(key))
     }
 
-    pub fn get_by_keys<T: CLTyped + FromBytes>(&self, keys: (&Key, &Key)) -> Option<T> {
-        self.get(&keys_to_str(keys.0, keys.1))
-    }
-
     pub fn set<T: CLTyped + ToBytes>(&self, key: &str, value: T) {
         storage::dictionary_put(self.uref, key, Some(value));
     }
 
     pub fn set_by_key<T: CLTyped + ToBytes>(&self, key: &Key, value: T) {
         self.set(&key_to_str(key), value);
-    }
-
-    pub fn set_by_keys<T: CLTyped + ToBytes>(&self, keys: (&Key, &Key), value: T) {
-        self.set(&keys_to_str(keys.0, keys.1), value)
     }
 
     pub fn remove<T: CLTyped + ToBytes>(&self, key: &str) {
@@ -63,10 +55,6 @@ impl Dict {
     pub fn remove_by_key<T: CLTyped + ToBytes>(&self, key: &Key) {
         self.remove::<T>(&key_to_str(key));
     }
-
-    pub fn remove_by_vec_of_keys<T: CLTyped + ToBytes>(&self, keys: (&Key, &Key)) {
-        self.remove::<T>(&keys_to_str(keys.0, keys.1))
-    }
 }
 
 pub fn key_to_str(key: &Key) -> String {
@@ -75,16 +63,6 @@ pub fn key_to_str(key: &Key) -> String {
         Key::Hash(package) => hex::encode(package),
         _ => runtime::revert(ApiError::UnexpectedKeyVariant),
     }
-}
-
-pub fn keys_to_str(key_a: &Key, key_b: &Key) -> String {
-    let mut bytes_a = key_a.to_bytes().unwrap_or_revert();
-    let mut bytes_b = key_b.to_bytes().unwrap_or_revert();
-
-    bytes_a.append(&mut bytes_b);
-
-    let bytes = runtime::blake2b(bytes_a);
-    hex::encode(bytes)
 }
 
 pub fn get_key<T: FromBytes + CLTyped>(name: &str) -> Option<T> {
