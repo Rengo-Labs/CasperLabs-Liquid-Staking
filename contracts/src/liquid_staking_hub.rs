@@ -143,6 +143,7 @@ fn delegate(delegator: PublicKey, validator: PublicKey, amount: U512) -> U512 {
         auction::ARG_VALIDATOR => validator,
         auction::ARG_AMOUNT => amount,
     };
+    
     // Adds a new delegator to delegators or increases its current stake. If the target validator
     // is missing, the function call returns an error and does nothing.
     //
