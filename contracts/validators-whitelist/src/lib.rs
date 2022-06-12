@@ -32,5 +32,5 @@ use casper_types::{
     CLValue, URef, U256, U512, EntryPoints,
     ContractPackageHash, ApiError, contracts::NamedKeys
 };
-use contract_utils::{ AdminControl, ContractContext, ContractStorage, Dict };
+use contract_utils::{ AdminControl, ContractContext, ContractStorage, Dict, Address };
 
