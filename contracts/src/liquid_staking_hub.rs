@@ -81,8 +81,6 @@ pub extern "C" fn deposit() {
 
     // TODO
     // Call "mint" function of ERC20
-
-    // Issue CSWAP tokens to the staker
     ERC20::default()
         .mint(sender, cspr_amount_u256)
         .unwrap_or_revert();
@@ -118,8 +116,7 @@ pub extern "C" fn withdraw() {
         .unwrap_or_revert();
         
         // TODO
-        // Call "mint" function of ERC20
-    
+        // Call "burn" function of ERC20
         ERC20::default()
             .burn(sender, cspr_amount_u256)
             .unwrap_or_revert();

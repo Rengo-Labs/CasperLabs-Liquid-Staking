@@ -30,11 +30,10 @@ pub struct ValidatorResponse {
 fn call() {
     
     // Runtime arguments
-    let liquid_staking_hub_contract_hash: ContractHash = runtime::get_named_arg(LIQUID_STAKING_HUB_HASH_RUNTIME_ARG_NAME);
-    let liquid_staking_hub_contract_package_hash: ContractPackageHash = runtime::get_named_arg(LIQUID_STAKING_HUB_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME);
-    // let dao_contract_hash: ContractHash = runtime::get_named_arg(DAO_CONTRACT_HASH_RUNTIME_ARG_NAME);
-    // let dao_contract_package_hash: ContractPackageHash = runtime::get_named_arg(DAO_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME);
-
+    let lcspr_hub_contract_hash: ContractHash = runtime::get_named_arg(LIQUID_STAKING_HUB_HASH_RUNTIME_ARG_NAME);
+    let lcspr_hub_contract_package_hash: ContractPackageHash = runtime::get_named_arg(LIQUID_STAKING_HUB_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME);
+    let lcspr_hub_contract_version: ContractVersion = runtime::get_named_arg(LIQUID_STAKING_HUB_CONTRACT_VERSION_RUNTIME_ARG_NAME);
+    
     let validators_to_whitelist: Vec<PublicKey> = runtime::get_named_arg(VALIDATORS_TO_WHITELIST_ARG_NAME);
     let admins_to_set: Vec<Key> = runtime::get_named_arg(ADMINS_TO_SET_ARG_NAME);
     
@@ -43,18 +42,16 @@ fn call() {
 
     // Named keys
     let named_keys: NamedKeys = named_keys::default(
-        liquid_staking_hub_contract_hash,
-        liquid_staking_hub_contract_package_hash,
-        // TODO
-        // Add necessary NamedKeys
+        lcspr_hub_contract_hash,
+        lcspr_contract_package_hash,
+        lcspr_hub_contract_version,
     );
 
     // Install upgradable contract
     let (contract_hash, contract_version) = storage::new_contract(entry_points, named_keys, VALIDATORS_WHITELIST_HASH_NAME, VALIDATORS_WHITELIST_UREF_NAME);
 
-    let key: Key = runtime::get_key(VALIDATORS_WHITELIST_CONTRACT_KEY_NAME).unwrap_or_revert();
-    let hash: HashAddr = key.into_hash().unwrap_or_revert();
-    let contract_hash = ContractHash::new(hash);
+    // Put lcspr validators whitelist contract hash as NamedKey in context of Deployer (owner)
+    runtime::put_key(VALIDATORS_WHITELIST_CONTRACT_KEY_NAME, Key::from(contract_hash));
 
     // TODO
     // Runtime arguments for "initialize_contract" function
@@ -113,16 +110,23 @@ pub extern "C" fn update_config(hub_contract_public_key: PublicKey, hub_contract
     }
 }
 
+// TODO
+// Re-work function
+fn get_validator(validator: PublicKey) -> Option<Validator, Error> {
+}
+
+/*
 fn get_validator(validator: PublicKey) -> Option<Validator, Error> {
 
-    // 
     let _validator: Validator = {
-        validator,
-        U512(0),
-        U512(0),
-        u8(0)
+        address = validator,
+        whitelisted = true,
+        total_delegated =  U512::from(0),
+        undelegating =U512::from(0),
+        unlock_deadline: u8::from(0),
     };
 }
+*/
 
 #[no_mangle]
 pub extern "C" fn add_validators(validator: PublicKey) {
