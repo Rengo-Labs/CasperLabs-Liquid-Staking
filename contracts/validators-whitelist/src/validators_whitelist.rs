@@ -64,6 +64,9 @@ fn call() {
         Key::from(hub_contract_version_uref)
     };
 
+    // TODO
+    // Create Dictionaries and coresponding NamedKeys
+
     named_keys.insert(OWNER_KEY_NAME.to_string(), owner_key);
     named_keys.insert(HUB_CONTRACT_HASH_KEY_NAME.to_string(), hub_contract_hash_key);
     named_keys.insert(HUB_CONTRACT_PACKAGE_HASH_KEY_NAME.to_string(), hub_contract_package_hash_key);
@@ -77,7 +80,6 @@ fn call() {
     // Put lcspr validators whitelist contract hash as NamedKey in context of Deployer (owner)
     runtime::put_key(VALIDATORS_WHITELIST_CONTRACT_KEY_NAME, Key::from(contract_hash));
 
-    // TODO
     // Runtime arguments for "initialize_contract" function
     let runtime_arguments: RuntimeArgs = RuntimeArgs::new();
 
