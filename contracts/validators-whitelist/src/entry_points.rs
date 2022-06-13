@@ -45,6 +45,14 @@ pub fn initialize_contract() -> EntryPoint {
         String::from("initialize_contract"),
         // TODO
         // Update arguements
+        // Vec::new(),
+        /*
+        vec![
+            Parameter::new(OWNER_RUNTIME_ARG_NAME, Address::cl_type()),
+            Parameter::new(RECIPIENT_RUNTIME_ARG_NAME, Address::cl_type()),
+            Parameter::new(AMOUNT_RUNTIME_ARG_NAME, U256::cl_type()),
+        ],
+        */
         vec![],
         CLType::Unit,
         EntryPointAccess::Public,
