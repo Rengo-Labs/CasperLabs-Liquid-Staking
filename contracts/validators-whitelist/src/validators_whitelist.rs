@@ -4,9 +4,13 @@
 // pub static REGISTRY: Map<&[u8], Validator> = Map::new("validators_registry");
 
 pub struct Config {
-    pub owner: ContractHash,
+    // Owner could be PublicKey or ContractHash
+    // We can use `Key` type as well
+    // Taken `Address` implementation of erc20 crate
+    pub owner: Address,
     pub hub_contract_hash: ContractHash,
-    pub hub_contract_package_hash: ContractPackageHash
+    pub hub_contract_package_hash: ContractPackageHash,
+    pub hub_contract_version: ContractVersion
 }
 pub struct Validator {
     pub address: PublicKey,
