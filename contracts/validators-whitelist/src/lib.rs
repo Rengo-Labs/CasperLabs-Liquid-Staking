@@ -11,15 +11,16 @@ pub mod constants;
 pub mod entry_points;
 
 pub use constants::{
-    LIQUID_STAKING_HUB_HASH_RUNTIME_ARG_NAME, LIQUID_STAKING_HUB_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME,
-    LIQUID_STAKING_HUB_CONTRACT_VERSION_RUNTIME_ARG_NAME,
+    HUB_CONTRACT_HASH_RUNTIME_ARG_NAME, HUB_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME,
+    HUB_CONTRACT_VERSION_RUNTIME_ARG_NAME, OWNER_KEY_NAME,
     VALIDATORS_TO_WHITELIST_ARG_NAME, ADMINS_TO_SET_ARG_NAME, VALIDATORS_WHITELIST_HASH_NAME,
     VALIDATORS_WHITELIST_UREF_NAME, VALIDATORS_WHITELIST_CONTRACT_KEY_NAME,
-    
+    VALIDATORS_RESPONSE_DICTIONARY_KEY_NAME, VALIDATORS_WHITELIST_DICTIONARY_KEY_NAME,
+    HUB_CONTRACT_HASH_KEY_NAME, HUB_CONTRACT_PACKAGE_HASH_KEY_NAME,
+    HUB_CONTRACT_VERSION_KEY_NAME, 
     // TODO
     // Check if used
-    VALIDATORS_WHITELIST_DICTIONARY_KEY_NAME,
-    VALIDATORS_UNSTAKE_DICTIONARY_KEY_NAME, OWNER_KEY_NAME
+    VALIDATORS_UNSTAKE_DICTIONARY_KEY_NAME, 
 };
 pub use helpers::{ get_immediate_caller_address, get_key, get_main_purse, set_key, set_main_purse };
 
@@ -34,5 +35,5 @@ use casper_types::{
     CLValue, URef, U256, U512, EntryPoints,
     ContractPackageHash, ApiError, contracts::NamedKeys
 };
-use contract_utils::{ AdminControl, ContractContext, ContractStorage, Dict, Address };
+use contract_utils::{ AdminControl, ContractContext, ContractStorage, Dict, Address, data::get_caller_address };
 

@@ -3,15 +3,6 @@
 // LIDO's mappings
 // pub static REGISTRY: Map<&[u8], Validator> = Map::new("validators_registry");
 
-pub struct Config {
-    // Owner could be PublicKey or ContractHash
-    // We can use `Key` type as well
-    // Taken `Address` implementation of erc20 crate
-    pub owner: Address,
-    pub hub_contract_hash: ContractHash,
-    pub hub_contract_package_hash: ContractPackageHash,
-    pub hub_contract_version: ContractVersion
-}
 pub struct Validator {
     pub address: PublicKey,
     pub whitelisted: bool,
@@ -33,6 +24,9 @@ pub struct ValidatorResponse {
 #[no_mangle]
 fn call() {
     
+    // Get caller of type `Address` (erc20 implemetation)
+    let caller = data::get_caller_address();
+    
     // Runtime arguments
     let lcspr_hub_contract_hash: ContractHash = runtime::get_named_arg(LIQUID_STAKING_HUB_HASH_RUNTIME_ARG_NAME);
     let lcspr_hub_contract_package_hash: ContractPackageHash = runtime::get_named_arg(LIQUID_STAKING_HUB_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME);
@@ -45,11 +39,37 @@ fn call() {
     let entry_points: EntryPoints = entry_points::validators_whitelist_entry_points();
 
     // Named keys
-    let named_keys: NamedKeys = named_keys::default(
-        lcspr_hub_contract_hash,
-        lcspr_contract_package_hash,
-        lcspr_hub_contract_version,
-    );
+    let named_keys: NamedKeys = NamedKeys::new();
+
+    let owner_key = {
+        let owner_uref = storage::new_uref(caller).into_read_write();
+        Key::from(owner_uref)
+    };
+
+    let hub_contract_hash_key = {
+        // Type: ContractHash
+        let hub_contract_hash_uref = storage::new_uref(hub_contract_hash).into_read_write();
+        Key::from(hub_contract_hash_uref)
+    };
+
+    let hub_contract_package_hash_key = {
+        // Type: ContractPackageHash
+        let hub_contract_package_hash_uref = storage::new_uref(hub_contract_package_hash).into_read_write();
+        Key::from(hub_contract_package_hash_uref)
+    };
+
+    let hub_contract_version_key = {
+        // Type: ContractVersion
+        let hub_contract_version_uref = storage::new_uref(hub_contract_version).into_read_write();
+        Key::from(hub_contract_version_uref)
+    };
+
+    named_keys.insert(OWNER_KEY_NAME.to_string(), owner_key);
+    named_keys.insert(HUB_CONTRACT_HASH_KEY_NAME.to_string(), hub_contract_hash_key);
+    named_keys.insert(HUB_CONTRACT_PACKAGE_HASH_KEY_NAME.to_string(), hub_contract_package_hash_key);
+    named_keys.insert(HUB_CONTRACT_VERSION_KEY_NAME.to_string(), hub_contract_version_key);
+    named_keys.insert(VALIDATORS_WHITELIST_DICTIONARY_KEY_NAME.to_string(), validators_whitelist_dictionary_key);
+    named_keys.insert(VALIDATORS_RESPONSE_DICTIONARY_KEY_NAME.to_string(), validators_response_dictionary_key);
 
     // Install upgradable contract
     let (contract_hash, contract_version) = storage::new_contract(entry_points, named_keys, VALIDATORS_WHITELIST_HASH_NAME, VALIDATORS_WHITELIST_UREF_NAME);

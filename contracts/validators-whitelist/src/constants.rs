@@ -11,6 +11,13 @@ pub const VALIDATORS_WHITELIST_UREF_NAME: &str = "lcspr_validators_whitelist_ure
 /// Named keys
 //
 pub const OWNER_KEY_NAME: &str = "owner";
+//
+pub const HUB_CONTRACT_HASH_KEY_NAME:  &str = "hub_contract_hash";
+//
+pub const HUB_CONTRACT_PACKAGE_HASH_KEY_NAME:  &str = "hub_contract_package_hash";
+//
+pub const HUB_CONTRACT_VERSION_KEY_NAME:  &str = "hub_contract_version";
+
 
 /// Dictionaries
 //
@@ -36,11 +43,11 @@ pub const INITIALIZE_CONTRACT_ENTRY_POINT_NAME:  &str = "initialize_contract";
 
 pub const AMOUNT_KEY_NAME:  &str = "amount";
 //
-pub const LIQUID_STAKING_HUB_HASH_RUNTIME_ARG_NAME:  &str = "lcspr_hub_contract_hash";
+pub const HUB_CONTRACT_HASH_RUNTIME_ARG_NAME:  &str = "lcspr_hub_contract_hash";
 //
-pub const LIQUID_STAKING_HUB_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME:  &str = "lcspr_hub_contract_package_hash";
+pub const HUB_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME:  &str = "lcspr_hub_contract_package_hash";
 //
-pub const LIQUID_STAKING_HUB_CONTRACT_VERSION_RUNTIME_ARG_NAME:  &str = "lcspr_hub_contract_version";
+pub const HUB_CONTRACT_VERSION_RUNTIME_ARG_NAME:  &str = "lcspr_hub_contract_version";
 //
 /*
 pub const DAO_CONTRACT_HASH_RUNTIME_ARG_NAME:  &str = "lcspr_dao_contract_hash";

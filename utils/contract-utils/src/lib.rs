@@ -14,6 +14,6 @@ pub mod balances;
 pub use admin_control::AdminControl;
 pub use contract_context::ContractContext;
 pub use contract_storage::{ContractStorage, OnChainContractStorage};
-pub use data::{get_key, key_to_str, set_key, Dict};
+pub use data::{get_key, key_to_str, set_key, get_caller_address, Dict};
 pub use address::Address;
 pub use error:Error;
