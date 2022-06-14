@@ -188,32 +188,36 @@ pub extern "C" fn get_validators_whitelist(validator: PublicKey) -> Validator {
 }
 
 // LIDO's Round Robin
-pub fn calculate_delegations(
+fn calculate_delegations(
     mut amount_to_delegate: U512,
     validators: &[ValidatorResponse],
 ) -> Result<(U512, Vec<U512>)> {
+    
     if validators.is_empty() {
-        return Err(StdError::generic_err("Empty validators set"));
         // TODO
         // Rework error:
+        return Err(StdError::generic_err("Empty validators set"));
     }
-    let total_delegated: U512 = validators.iter().map(|v| v.total_delegated.U512()).sum();
+    
+    // TODO
+    // Rewok calculations into "checked_add" implementations
+    let total_delegated: U512 = validators.iter().map(|v| v.total_delegated).sum();
     let total_coins_to_distribute: U512 = total_delegated + amount_to_delegate;
     let coins_per_validator: U512 = total_coins_to_distribute / validators.len();
     let remaining_coins: U512 = total_coins_to_distribute % validators.len();
 
     let mut delegations = vec![U512::zero(); validators.len()];
     for (index, validator) in validators.iter().enumerate() {
-        let extra_coin = if (index + 1) as u128 <= remaining_coins {
-            1u128
+        let extra_coin = if (index + 1) as U512 <= remaining_coins {
+            U512::from(1);
         } else {
-            0u128
+            U512::from(0);
         };
-        if coins_per_validator + extra_coin < validator.total_delegated.u128() {
+        if coins_per_validator + extra_coin < validator.total_delegated {
             continue;
         }
         let mut to_delegate =
-            Uint128::from(coins_per_validator + extra_coin).sub(validator.total_delegated);
+            U512::from(coins_per_validator + extra_coin).sub(validator.total_delegated);
         if to_delegate > amount_to_delegate {
             to_delegate = amount_to_delegate
         }
@@ -226,38 +230,42 @@ pub fn calculate_delegations(
     Ok((amount_to_delegate, delegations))
 }
 
-pub fn calculate_undelegations(
-    mut undelegation_amount: Uint128,
+fn calculate_undelegations(
+    mut undelegation_amount: U512,
     mut validators: Vec<ValidatorResponse>,
-) -> StdResult<Vec<Uint128>> {
+) -> Result<Vec<U512>> {
+    
     if validators.is_empty() {
+        // TODO
+        // Rework error:
         return Err(StdError::generic_err("Empty validators set"));
     }
 
-    let mut total_delegated: Uint128 = validators.iter().map(|v| v.total_delegated).sum();
+    let mut total_delegated: U512 = validators.iter().map(|v| v.total_delegated).sum();
 
     if undelegation_amount > total_delegated {
+        // TODO
+        // Rework error:
         return Err(StdError::generic_err(
             "undelegate amount can't be bigger than total delegated amount",
         ));
     }
 
-    let mut undelegations = vec![Uint128::zero(); validators.len()];
+    let mut undelegations = vec![U512::zero(); validators.len()];
 
     while !undelegation_amount.is_zero() {
-        let total_coins_after_undelegation = total_delegated.sub(undelegation_amount);
-        let coins_per_validator = total_coins_after_undelegation.u128() / validators.len() as u128;
-        let remaining_coins = total_coins_after_undelegation.u128() % validators.len() as u128;
+        let total_coins_after_undelegation: U512 = total_delegated.sub(undelegation_amount);
+        let coins_per_validator: U512 = total_coins_after_undelegation / validators.len() as U512;
+        let remaining_coins: U512 = total_coins_after_undelegation % validators.len() as U512;
 
         for (index, validator) in validators.iter_mut().enumerate() {
-            let extra_coin = if (index + 1) as u128 <= remaining_coins {
-                1u128
+            let extra_coin = if (index + 1) as U512 <= remaining_coins {
+                U512::from(1);
             } else {
-                0u128
+                U512::from(0);
             };
             let mut to_undelegate = validator.total_delegated.checked_sub(
-                Uint128::from(coins_per_validator + extra_coin).min(validator.total_delegated),
-            )?;
+                coins_per_validator + extra_coin).min(validator.total_delegated)?;
             if to_undelegate > undelegation_amount {
                 to_undelegate = undelegation_amount
             }
