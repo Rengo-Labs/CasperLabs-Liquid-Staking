@@ -101,7 +101,10 @@ pub extern "C" fn initialize_contract() {
 
             // TODO
             // Runtime arguments
-            let validator_to_whitelist: PublicKey = runtime::get_named_arg(VALIDATOR_TO_WHITELIST_ARG_NAME);            
+            // let validator_to_whitelist: PublicKey = runtime::get_named_arg(VALIDATORS_TO_WHITELIST_ARG_NAME);
+            let validators_to_whitelist: Vec<PublicKey> = runtime::get_named_arg(VALIDATORS_TO_WHITELIST_ARG_NAME);
+            let admins_to_set: Vec<Key> = runtime::get_named_arg(ADMINS_TO_SET_ARG_NAME);
+    
             
             // TODO
             // Create NamedKeys
@@ -191,13 +194,15 @@ pub fn calculate_delegations(
 ) -> Result<(U512, Vec<U512>)> {
     if validators.is_empty() {
         return Err(StdError::generic_err("Empty validators set"));
+        // TODO
+        // Rework error:
     }
-    let total_delegated: u128 = validators.iter().map(|v| v.total_delegated.u128()).sum();
-    let total_coins_to_distribute = Uint128::from(total_delegated) + amount_to_delegate;
-    let coins_per_validator = total_coins_to_distribute.u128() / validators.len() as u128;
-    let remaining_coins = total_coins_to_distribute.u128() % validators.len() as u128;
+    let total_delegated: U512 = validators.iter().map(|v| v.total_delegated.U512()).sum();
+    let total_coins_to_distribute: U512 = total_delegated + amount_to_delegate;
+    let coins_per_validator: U512 = total_coins_to_distribute / validators.len();
+    let remaining_coins: U512 = total_coins_to_distribute % validators.len();
 
-    let mut delegations = vec![Uint128::zero(); validators.len()];
+    let mut delegations = vec![U512::zero(); validators.len()];
     for (index, validator) in validators.iter().enumerate() {
         let extra_coin = if (index + 1) as u128 <= remaining_coins {
             1u128
