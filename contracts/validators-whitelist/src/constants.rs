@@ -2,17 +2,15 @@
 //
 pub const VALIDATORS_WHITELIST_CONTRACT_KEY_NAME: &str = "lcspr_validators_whitelist";
 //
-pub const VALIDATORS_WHITELIST_HASH_NAME: &str = "lcspr_validators_whitelist_hash";
-
-pub const VALIDATORS_WHITELIST_PACKAGE_HASH_NAME: &str = "lcspr_validators_whitelist_contract_package_hash";
+pub const VALIDATORS_WHITELIST_PACKAGE_HASH_KEY_NAME: &str = "lcspr_validators_whitelist_contract_package_hash";
 //
-pub const VALIDATORS_WHITELIST_UREF_NAME: &str = "lcspr_validators_whitelist_uref";
+pub const VALIDATORS_WHITELIST_UREF_KEY_NAME: &str = "lcspr_validators_whitelist_uref";
+//
+pub const VALIDATORS_WHITELIST_VERSION_KEY_NAME: &str = "lcspr_validators_whitelist_stable_version";
 
 /// Named keys
 //
 pub const OWNER_KEY_NAME: &str = "owner";
-//
-pub const HUB_CONTRACT_HASH_KEY_NAME:  &str = "hub_contract_hash";
 //
 pub const HUB_CONTRACT_PACKAGE_HASH_KEY_NAME:  &str = "hub_contract_package_hash";
 //

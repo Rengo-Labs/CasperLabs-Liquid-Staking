@@ -5,10 +5,14 @@
 
 pub struct Validator {
     pub address: PublicKey,
+    
+    // Values I suppose to be usefull
+    /*
     pub whitelisted: bool,
     pub total_delegated: U512,
     pub undelegating: U512,
     pub unlock_deadline: u8
+    */
 }
 
 impl Validator {
@@ -16,7 +20,6 @@ impl Validator {
 }
 
 pub struct ValidatorResponse {
-    // #[serde(default)]
     pub total_delegated: U512,
     pub address: PublicKey
 }
@@ -28,9 +31,8 @@ fn call() {
     let caller = data::get_caller_address();
     
     // Runtime arguments
-    let lcspr_hub_contract_hash: ContractHash = runtime::get_named_arg(LIQUID_STAKING_HUB_HASH_RUNTIME_ARG_NAME);
-    let lcspr_hub_contract_package_hash: ContractPackageHash = runtime::get_named_arg(LIQUID_STAKING_HUB_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME);
-    let lcspr_hub_contract_version: ContractVersion = runtime::get_named_arg(LIQUID_STAKING_HUB_CONTRACT_VERSION_RUNTIME_ARG_NAME);
+    let lcspr_hub_contract_package_hash: ContractPackageHash = runtime::get_named_arg(HUB_CONTRACT_PACKAGE_HASH_RUNTIME_ARG_NAME);
+    let lcspr_hub_contract_version: ContractVersion = runtime::get_named_arg(HUB_CONTRACT_VERSION_RUNTIME_ARG_NAME);
     
     let validators_to_whitelist: Vec<PublicKey> = runtime::get_named_arg(VALIDATORS_TO_WHITELIST_ARG_NAME);
     let admins_to_set: Vec<Key> = runtime::get_named_arg(ADMINS_TO_SET_ARG_NAME);
@@ -44,12 +46,6 @@ fn call() {
     let owner_key = {
         let owner_uref = storage::new_uref(caller).into_read_write();
         Key::from(owner_uref)
-    };
-
-    let hub_contract_hash_key = {
-        // Type: ContractHash
-        let hub_contract_hash_uref = storage::new_uref(hub_contract_hash).into_read_write();
-        Key::from(hub_contract_hash_uref)
     };
 
     let hub_contract_package_hash_key = {
@@ -68,7 +64,6 @@ fn call() {
     // Create Dictionaries and coresponding NamedKeys
 
     named_keys.insert(OWNER_KEY_NAME.to_string(), owner_key);
-    named_keys.insert(HUB_CONTRACT_HASH_KEY_NAME.to_string(), hub_contract_hash_key);
     named_keys.insert(HUB_CONTRACT_PACKAGE_HASH_KEY_NAME.to_string(), hub_contract_package_hash_key);
     named_keys.insert(HUB_CONTRACT_VERSION_KEY_NAME.to_string(), hub_contract_version_key);
     named_keys.insert(VALIDATORS_WHITELIST_DICTIONARY_KEY_NAME.to_string(), validators_whitelist_dictionary_key);
@@ -77,8 +72,12 @@ fn call() {
     // Install upgradable contract
     let (contract_hash, contract_version) = storage::new_contract(entry_points, named_keys, VALIDATORS_WHITELIST_HASH_NAME, VALIDATORS_WHITELIST_UREF_NAME);
 
+    // TODO
+    // Save current stable contract vesrion in context of deployer
+    //
+    // ContractPackageHash already saved to context on "storage::new_contract" call
     // Put lcspr validators whitelist contract hash as NamedKey in context of Deployer (owner)
-    runtime::put_key(VALIDATORS_WHITELIST_CONTRACT_KEY_NAME, Key::from(contract_hash));
+    // runtime::put_key(VALIDATORS_WHITELIST_VERSION_KEY_NAME, Key::from(contract_version));
 
     // Runtime arguments for "initialize_contract" function
     let runtime_arguments: RuntimeArgs = RuntimeArgs::new();
@@ -113,9 +112,6 @@ pub extern "C" fn initialize_contract() {
             let whitelist_dict_uref: URef = storage::new_dictionary(VALIDATORS_WHITELIST_DICTIONARY_KEY_NAME).unwrap_or_revert();
             // Put
             storage::dictionary_put(whitelist_dict_uref, key, value);
-
-            // Create a dictionary track the mapping of "Validator structure" to unstaking period / amount
-            storage::new_dictionary(VALIDATORS_UNSTAKE_DICTIONARY_KEY_NAME).unwrap_or_revert();
         }
     }
 
