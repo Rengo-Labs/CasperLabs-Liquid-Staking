@@ -4,8 +4,8 @@ use casper_client::Error;
 use casper_types::{AsymmetricType, PublicKey, EntryPoints, NamedKeys, RuntimeArgs};
 use contract_utils::{Address, data::get_caller_address};
 
-pub const HASH_NAME: &str = "contract_delegation_hash";
-pub const UREF_NAME: &str = "contract_delegation_uref";
+pub const HASH_NAME: &str = "public_key_contract_delegation_hash";
+pub const UREF_NAME: &str = "public_key_contract_delegation_uref";
 
 fn public_key_for_contract() -> PublicKey {
     // 
@@ -30,19 +30,6 @@ pub fn undelegate_from(validator: PublicKey) {
 
 }
 
-fn get_entry_points() -> EntryPoints {
-
-    // Create contract's entry points
-
-    // initialize_contract
-
-    // delegate_to
-
-    // undelegate_from
-    
-    // Return entry points
-}
-
 pub fn initialize_contract() {
     
     // Get PublicKey for the contract
@@ -59,8 +46,7 @@ fn call() {
     
     let caller: Address = get_caller_address();
     
-    // TODO
-    // Implement defaul() function for entry points
+    // Entry points
     let entry_points: EntryPoints = get_entry_points();
 
     // Named keys
@@ -77,4 +63,47 @@ fn call() {
     // TODO call versioned contract
     let _: () = runtime::call_contract(contract_hash, "initialize_contract", runtime_arguments);
     
+}
+
+fn get_entry_points() -> EntryPoints {
+
+    // Create contract's entry points
+    let mut entry_points = EntryPoints::new();
+    
+    // Entry point: initialize_contract
+    entry_points.add_entry_point(
+        EntryPoint::new(
+            String::from("initialize_contract"),
+            vec![],
+            CLType::Unit,
+            EntryPointAccess::Public,
+            EntryPointType::Contract,
+        )
+    );
+    
+    // Entry point: delegate_to
+    entry_points.add_entry_point(
+        EntryPoint::new(
+            String::from("delegate_to"),
+            vec![Parameter::new("validator", PublicKey::cl_type()),],
+            CLType::Unit,
+            EntryPointAccess::Public,
+            EntryPointType::Contract,
+        )
+    );
+    
+    // Entry point: undelegate_from
+    entry_points.add_entry_point(
+        EntryPoint::new(
+            String::from("undelegate_from"),
+            vec![Parameter::new("validator", PublicKey::cl_type()),],
+            CLType::Unit,
+            EntryPointAccess::Public,
+            EntryPointType::Contract,
+        )
+    );
+    
+    // Return entry points
+    entry_points
+
 }
