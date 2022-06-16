@@ -74,6 +74,8 @@ fn call() {
 
     // TODO
     // Save current stable contract vesrion in context of deployer
+    // into_bytes
+    // Save bytes as Key
     //
     // ContractPackageHash already saved to context on "storage::new_contract" call
     // Put lcspr validators whitelist contract hash as NamedKey in context of Deployer (owner)
