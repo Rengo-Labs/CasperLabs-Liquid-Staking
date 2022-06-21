@@ -1,21 +1,54 @@
+mod key_pairs;
+
+use key_pairs::get_new_public_key;
+
 use std::str;
+use alloc::string::String;
 
 use casper_client::Error;
 use casper_contract::{ contract_api::{runtime, system, storage}, unwrap_or_revert::UnwrapOrRevert };
-use casper_types::{AsymmetricType, PublicKey, EntryPoints, NamedKeys, RuntimeArgs, runtime_args, U512, system::auction};
+use casper_types::{
+    AsymmetricType, PublicKey, EntryPoints, NamedKeys,
+    RuntimeArgs, runtime_args, U512, system::auction,
+    AccountHash, 
+};
 use contract_utils::{Address, data::get_caller_address};
 
-pub const HASH_NAME: &str = "public_key_contract_delegation_hash";
-pub const UREF_NAME: &str = "public_key_contract_delegation_uref";
-pub const PUBLIC_KEY: &str = "contracts_public_key";
+pub const HASH_NAME: &str = "public_key_delegation_contract_hash";
+pub const UREF_NAME: &str = "public_key_delegation_contract_uref";
+pub const PUBLIC_KEY: &str = "contract_public_key";
+pub const ACCOUNT_HASH: &str = "contract_account_hash";
+pub const PUBLIC_KEY_HEX: &str = "contract_public_key_hex";
 
 fn public_key_for_contract() -> PublicKey {
-    // 
+    
+    // Options to create `PublicKey`
+
+    // pub fn from_bytes(bytes: &[u8]) -> Result<PublicKey, SignatureError>
+    // Construct a PublicKey from a slice of bytes.
+    // The caller is responsible for ensuring that the bytes passed into this method
+    // actually represent a curve25519_dalek::curve::CompressedEdwardsY
+    // and that said compressed point is actually a point on the curve.
+    let bytes_curve25519: &[u8] = 
+    let public_key_1 = from_bytes(bytes_curve25519);
+    
+    let public_key: PublicKey = get_new_public_key();
+
+    /*
     let hex_public_key: 
     let public_key = PublicKey::from_hex(&hex_public_key).map_err(|error| {
         eprintln!("Can't parse {} as a public key: {}", hex_public_key, error);
         Error::FailedToParseKey
     })?;
+    */
+
+    let account_hash: AccountHash = public_key.to_account_hash();
+    set_key(ACCOUNT_HASH, account_hash);
+
+    let public_key_hex: String = public_key.to_hex();
+    set_key(PUBLIC_KEY_HEX, public_key_hex);
+
+
 
     public_key
 }
