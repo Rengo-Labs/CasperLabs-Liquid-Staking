@@ -14,21 +14,21 @@ use casper_types::{
     RuntimeArgs, runtime_args, U512, system::auction,
 };
 
-pub const HASH_NAME: &str = "public_key_delegation_contract_hash";
-pub const UREF_NAME: &str = "public_key_delegation_contract_uref";
+const HASH_NAME: &str = "public_key_delegation_contract_hash";
+const UREF_NAME: &str = "public_key_delegation_contract_uref";
 
-pub const PUBLIC_KEY: &str = "contract_public_key";
-pub const ACCOUNT_HASH: &str = "contract_account_hash";
-pub const PUBLIC_KEY_HEX: &str = "contract_public_key_hex";
-pub const PUBLIC_KEY: &str = "contract_public_key";
-pub const CONTRACT_PURSE: &str = "contract_purse";
-pub const INIT: &str = "contract_purse";
+const PUBLIC_KEY: &str = "contract_public_key";
+const ACCOUNT_HASH: &str = "contract_account_hash";
+const PUBLIC_KEY_HEX: &str = "contract_public_key_hex";
+const PUBLIC_KEY: &str = "contract_public_key";
+const CONTRACT_PURSE: &str = "contract_purse";
+const INIT: &str = "contract_purse";
 
-pub const ENTRY_POINT_INIT: &str = "initialize_contract";
-pub const ENTRY_POINT_DELEGATE: &str = "delegate_to";
-pub const ENTRY_POINT_UNDELEGATE: &str = "initialized";
+const ENTRY_POINT_INIT: &str = "initialize_contract";
+const ENTRY_POINT_DELEGATE: &str = "delegate_to";
+const ENTRY_POINT_UNDELEGATE: &str = "initialized";
 
-pub extern "C" delegate_to(validator: PublicKey) {
+pub extern "C" delegate_to() {
     
     // Get entry point args
     let validator: PublicKey = runtime::get_named_arg(auction::ARG_VALIDATOR);
@@ -76,7 +76,7 @@ fn undelegate(delegator: PublicKey, validator: PublicKey, amount: U512) {
     let _amount: U512 = runtime::call_contract(contract_hash, auction::METHOD_UNDELEGATE, args);
 }
 
-pub fn initialize_contract() {
+pub extern "C" initialize_contract() {
     
     // Check that conrtact is not initialized
     let value: Option<bool> = get_key(INIT);
