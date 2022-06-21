@@ -220,3 +220,6 @@ fn set_key<T: ToBytes + CLTyped>(name: &str, value: T) {
 //     *contract_main_purse
 
 // }
+
+// TODO
+// Make EntryPoints to query PublicKey, MainPurse

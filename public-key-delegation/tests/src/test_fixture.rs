@@ -15,6 +15,13 @@ const ENTRY_POINT_INIT: &str = "initialize_contract";
 const ENTRY_POINT_DELEGATE: &str = "delegate_to";
 const ENTRY_POINT_UNDELEGATE: &str = "initialized";
 
+pub const PUBLIC_KEY: &str = "contract_public_key";
+const ACCOUNT_HASH: &str = "contract_account_hash";
+const PUBLIC_KEY_HEX: &str = "contract_public_key_hex";
+const PUBLIC_KEY: &str = "contract_public_key";
+const CONTRACT_PURSE: &str = "contract_purse";
+const INIT: &str = "contract_purse";
+
 fn blake2b256(item_key_string: &[u8]) -> Box<[u8]> {
     let mut hasher = VarBlake2b::new(32).unwrap();
     hasher.update(item_key_string);
@@ -130,5 +137,10 @@ impl TestFixture {
             ENTRY_POINT_INIT,
             runtime_args! {},
         );
+    }
+
+    pub fn public_key(&self) -> PublicKey {
+        self.query_contract(PUBLIC_KEY)
+            .unwrap()
     }
 }
