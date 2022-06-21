@@ -1,11 +1,13 @@
 use std::str;
 
 use casper_client::Error;
-use casper_types::{AsymmetricType, PublicKey, EntryPoints, NamedKeys, RuntimeArgs};
+use casper_contract::{ contract_api::{runtime, system, storage}, unwrap_or_revert::UnwrapOrRevert };
+use casper_types::{AsymmetricType, PublicKey, EntryPoints, NamedKeys, RuntimeArgs, runtime_args, U512, system::auction};
 use contract_utils::{Address, data::get_caller_address};
 
 pub const HASH_NAME: &str = "public_key_contract_delegation_hash";
 pub const UREF_NAME: &str = "public_key_contract_delegation_uref";
+pub const PUBLIC_KEY: &str = "contracts_public_key";
 
 fn public_key_for_contract() -> PublicKey {
     // 
@@ -18,16 +20,52 @@ fn public_key_for_contract() -> PublicKey {
     public_key
 }
 
-pub fn delegate_to(validator: PublicKey) {
+pub extern "C" delegate_to(validator: PublicKey) {
+    
+    // Get entry point args
+    let validator: PublicKey = runtime::get_named_arg(ARG_VALIDATOR);
+    let amount: U512 = runtime::get_named_arg(ARG_AMOUNT);
+
+    // Get contract's public key from the context's NamedKeys
+    let delegator: PublicKey = get_key(PUBLIC_KEY);
     
     // Call delegation function
+    delegate(delegator, validator, amount);
 
 }
 
-pub fn undelegate_from(validator: PublicKey) {
-    
-    // Call undelegation function
+fn delegate(delegator: PublicKey, validator: PublicKey, amount: U512) {
+    let contract_hash = system::get_auction();
+    let args = runtime_args! {
+        auction::ARG_DELEGATOR => delegator,
+        auction::ARG_VALIDATOR => validator,
+        auction::ARG_AMOUNT => amount,
+    };
+    runtime::call_contract::<U512>(contract_hash, auction::METHOD_DELEGATE, args);
+}
 
+pub extern "C" undelegate_from() {
+    
+    // Get entry point args
+    let validator: PublicKey = runtime::get_named_arg(ARG_VALIDATOR);
+    let amount: U512 = runtime::get_named_arg(ARG_AMOUNT);
+
+    // Get contract's public key from the context's NamedKeys
+    let delegator: PublicKey = get_key(PUBLIC_KEY);
+    
+    // Call delegation function
+    undelegate(delegator, validator, amount);
+
+}
+
+fn undelegate(delegator: PublicKey, validator: PublicKey, amount: U512) {
+    let contract_hash = system::get_auction();
+    let args = runtime_args! {
+        auction::ARG_DELEGATOR => delegator,
+        auction::ARG_VALIDATOR => validator,
+        auction::ARG_AMOUNT => amount,
+    };
+    let _amount: U512 = runtime::call_contract(contract_hash, auction::METHOD_UNDELEGATE, args);
 }
 
 pub fn initialize_contract() {
@@ -37,7 +75,16 @@ pub fn initialize_contract() {
     // Save Contract's PublicKey into NamedKeys
 
     // Create CSPR MainPurse for the contract
+    let value: Option<bool> = get_key("initialized");
+    match value {
+        Some(_) => {}
+        None => {
+            set_main_purse(system::create_purse());
+            set_key("initialized", true);
+        }
+    }
 
+    // TODO
     // Save MainPurse into NamedKeys
 
 }
@@ -85,7 +132,10 @@ fn get_entry_points() -> EntryPoints {
     entry_points.add_entry_point(
         EntryPoint::new(
             String::from("delegate_to"),
-            vec![Parameter::new("validator", PublicKey::cl_type()),],
+            vec![
+                Parameter::new(auction::ARG_VALIDATOR, PublicKey::cl_type()),
+                Parameter::new(AMOUNT_KEY_NAME, U512::cl_type()),
+            ],
             CLType::Unit,
             EntryPointAccess::Public,
             EntryPointType::Contract,
@@ -106,4 +156,28 @@ fn get_entry_points() -> EntryPoints {
     // Return entry points
     entry_points
 
+}
+
+fn get_key<T: FromBytes + CLTyped>(name: &str) -> Option<T> {
+    match runtime::get_key(name) {
+        None => None,
+        Some(value) => {
+            let key = value.try_into().unwrap_or_revert();
+            let result = storage::read(key).unwrap_or_revert().unwrap_or_revert();
+            Some(result)
+        }
+    }
+}
+
+fn set_key<T: ToBytes + CLTyped>(name: &str, value: T) {
+    match runtime::get_key(name) {
+        Some(key) => {
+            let key_ref = key.try_into().unwrap_or_revert();
+            storage::write(key_ref, value);
+        }
+        None => {
+            let key = storage::new_uref(value).into();
+            runtime::put_key(name, key);
+        }
+    }
 }
