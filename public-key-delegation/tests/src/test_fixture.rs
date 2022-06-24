@@ -11,16 +11,16 @@ use casper_types::{
 const CONTRACT_PUBLIC_KEY_DELEGATIONS: &str = "contract_public_key_delegation.wasm";
 const CONTRACT_KEY_NAME: &str = "public_key_delegation_contract_hash";
 
-const ENTRY_POINT_INIT: &str = "initialize_contract";
-const ENTRY_POINT_DELEGATE: &str = "delegate_to";
-const ENTRY_POINT_UNDELEGATE: &str = "initialized";
+pub const ENTRY_POINT_INIT: &str = "initialize_contract";
+pub const ENTRY_POINT_DELEGATE: &str = "delegate_to";
+pub const ENTRY_POINT_UNDELEGATE: &str = "initialized";
 
 pub const PUBLIC_KEY: &str = "contract_public_key";
-const ACCOUNT_HASH: &str = "contract_account_hash";
-const PUBLIC_KEY_HEX: &str = "contract_public_key_hex";
-const PUBLIC_KEY: &str = "contract_public_key";
-const CONTRACT_PURSE: &str = "contract_purse";
-const INIT: &str = "contract_purse";
+pub const ACCOUNT_HASH: &str = "contract_account_hash";
+pub const PUBLIC_KEY_HEX: &str = "contract_public_key_hex";
+pub const PUBLIC_KEY: &str = "contract_public_key";
+pub const CONTRACT_PURSE: &str = "contract_purse";
+pub const INIT: &str = "contract_purse";
 
 fn blake2b256(item_key_string: &[u8]) -> Box<[u8]> {
     let mut hasher = VarBlake2b::new(32).unwrap();
