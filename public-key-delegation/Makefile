@@ -1,7 +1,7 @@
 prepare:
 	rustup target add wasm32-unknown-unknown
 
-build-pkd: clean
+build-publickey: clean
 	cd contracts && cargo build --release --target wasm32-unknown-unknown
 	wasm-strip contracts/target/wasm32-unknown-unknown/release/contract_public_key_delegation.wasm 2>/dev/null | true
 
