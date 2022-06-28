@@ -6,12 +6,23 @@ use casper_types::{
     URef, U512, CLType, CLTyped, EntryPoint, EntryPointAccess, EntryPointType, EntryPoints, Parameter,
 };
 
+pub const PROTOCOL_FEE: &str = "protocol_fee";
+pub const PROTOCOL_LOCK_PERIOD: &str = "protocol_lock_period";
+pub const ARG_TMP_PURSE: &str = "tmp_purse";
+pub const ARG_AMOUNT: &str = "amount";
+pub const ENTRY_POINT_INIT: &str = "initialize_contract";
+const ENTRY_POINT_DEPOSIT: &str = "deposit";
+const ENTRY_POINT_WITHDRAW: &str = "withdraw";
+const ENTRY_POINT_CLAIM: &str = "claim";
+const ENTRY_POINT_SET_LOCK_PERIOD: &str = "set_lock_period";
+const ENTRY_POINT_SET_PROTOCOL_FEE: &str = "set_protocol_fee";
+
 // Entry point: deposit 
 pub fn deposit() -> EntryPoint {
     EntryPoint::new(
-        String::from("deposit"),
+        String::from(ENTRY_POINT_DEPOSIT),
         vec![
-            Parameter::new("tmp_purse", URef::cl_type()),
+            Parameter::new(ARG_TMP_PURSE, URef::cl_type()),
         ],
         CLType::Unit,
         EntryPointAccess::Public,
@@ -22,9 +33,9 @@ pub fn deposit() -> EntryPoint {
 // Entry point: withdraw 
 pub fn withdraw() -> EntryPoint {
     EntryPoint::new(
-        String::from("withdraw"),
+        String::from(ENTRY_POINT_WITHDRAW),
         vec![
-            Parameter::new("cspr_amount", U512::cl_type()),
+            Parameter::new(ARG_AMOUNT, U512::cl_type()),
         ],
         CLType::Unit,
         EntryPointAccess::Public,
@@ -35,9 +46,9 @@ pub fn withdraw() -> EntryPoint {
 // Entry point: claim 
 pub fn claim() -> EntryPoint {
     EntryPoint::new(
-        String::from("claim"),
+        String::from(ENTRY_POINT_CLAIM),
         vec![
-            Parameter::new("cspr_amount", U512::cl_type()),
+            Parameter::new(ARG_AMOUNT, U512::cl_type()),
         ],
         CLType::Unit,
         EntryPointAccess::Public,
@@ -48,10 +59,10 @@ pub fn claim() -> EntryPoint {
 // Entry point: set_lock_period 
 pub fn set_lock_period() -> EntryPoint {
     EntryPoint::new(
-        String::from("set_lock_period"),
-        // TODO
-        // Update arguements
-        vec![],
+        String::from(ENTRY_POINT_SET_LOCK_PERIOD),
+        vec![
+            Parameter::new(PROTOCOL_LOCK_PERIOD, U512::cl_type()),
+            ],
         CLType::Unit,
         EntryPointAccess::Public,
         EntryPointType::Contract,
@@ -61,28 +72,26 @@ pub fn set_lock_period() -> EntryPoint {
 // Entry point: set_protocol_fee 
 pub fn set_protocol_fee() -> EntryPoint {
     EntryPoint::new(
-        String::from("set_protocol_fee"),
-        // TODO
-        // Update arguements
-        vec![],
+        String::from(ENTRY_POINT_SET_PROTOCOL_FEE),
+        vec![
+            Parameter::new(PROTOCOL_FEE, U512::cl_type()),
+            ],
         CLType::Unit,
         EntryPointAccess::Public,
         EntryPointType::Contract,
     )
 }
 
-// Entry point: manual_reward_distribution 
-// pub fn manual_reward_distribution() -> EntryPoint {
-//     EntryPoint::new(
-//         String::from("manual_reward_distribution"),
-//         // TODO
-//         // Update arguements
-//         vec![],
-//         CLType::Unit,
-//         EntryPointAccess::Public,
-//         EntryPointType::Contract,
-//     )
-// }
+// Entry point: initialize_contract 
+pub fn init() -> EntryPoint {
+    EntryPoint::new(
+        String::from(ENTRY_POINT_INIT),
+        vec![],
+        CLType::Unit,
+        EntryPointAccess::Public,
+        EntryPointType::Contract,
+    )
+}
 
 pub fn hub_contract_entry_points() -> EntryPoints {
     let mut hub_entry_points = EntryPoints::new();
@@ -91,6 +100,6 @@ pub fn hub_contract_entry_points() -> EntryPoints {
     hub_entry_points.add_entry_point(claim());
     hub_entry_points.add_entry_point(set_protocol_fee());
     hub_entry_points.add_entry_point(set_lock_period());
-    // hub_entry_points.add_entry_point(manual_reward_distribution());
+    hub_entry_points.add_entry_point(init());
     hub_entry_points
 }

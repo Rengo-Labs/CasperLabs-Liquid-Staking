@@ -1,10 +1,12 @@
-use casper_types::PublicKey;
+/// UNSUED contract
 
-pub fn get_new_public_key() -> PublicKey {
+// use casper_types::PublicKey;
 
-    let new_public_key: PublicKey = PublicKey::generate_ed25519();
+// pub fn get_new_public_key() -> PublicKey {
 
-}
+//     let new_public_key: PublicKey = PublicKey::generate_ed25519();
+
+// }
 
 // Options to create `PublicKey`
 

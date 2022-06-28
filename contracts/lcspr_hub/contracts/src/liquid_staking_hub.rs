@@ -12,6 +12,10 @@ extern crate alloc;
 mod entry_points;
 mod helpers;
 
+use entry_points::{
+    ENTRY_POINT_INIT, PROTOCOL_FEE, ARG_TMP_PURSE,
+    ARG_AMOUNT, PROTOCOL_LOCK_PERIOD, 
+};
 use helpers::{
     get_immediate_caller_address, get_key, set_key,
     get_delegation_purse, set_delegation_purse,
@@ -33,19 +37,12 @@ use casper_types::{
 const CONTRACT_KEY_NAME: &str = "liquid_staking_hub";
 
 // Named constants for Delegation / Undelegation arguments
-const ARG_AMOUNT: &str = "amount";
 const ARG_VALIDATOR: &str = "validator";
 const ARG_DELEGATOR: &str = "delegator";
-const ARG_TMP_PURSE: &str = "tmp_purse";
 
 // Named Keys
 const KEY_DELEGATION_BALANCE: &str = "delegation_purse_balance";
 const KEY_WITHDRAW_BALANCE: &str = "withdraw_purse_balance";
-
-// Named constant for method `delegate`.
-const METHOD_DELEGATE: &str = "delegate";
-// Named constant for method `undelegate`.
-const METHOD_UNDELEGATE: &str = "undelegate";
 
 #[no_mangle]
 pub extern "C" fn deposit() {
@@ -83,6 +80,9 @@ pub extern "C" fn deposit() {
         .unwrap_or_revert();
 
     // Update CSPR balance of Hub's delegation purse
+    // TODO
+    // Check if it's necessary to have that NamedKey
+    // It's being set on regular user call
     set_key(KEY_DELEGATION_BALANCE, hub_delegation_balance_after);
 
     // Initiate delegation
@@ -184,18 +184,24 @@ pub extern "C" fn claim() {
 #[no_mangle]
 fn call() {
     
+    // Read PublicKey from runtime args
+    let new_public_key: PublicKey = runtime::get_named_arg(PUBLIC_KEY);
+    
+    // Entry points
     let entry_points: EntryPoints = entry_points::hub_contract_entry_points();
 
+    // Named keys
+    let named_keys: NamedKey = NamedKey::default();
+
+    // Install upgradable contract
+    let (contract_hash, contract_version) = storage::new_contract(entry_points, Some(named_keys), Some(HASH_NAME.to_string()), Some(UREF_NAME.to_string()));
+
+    // Initialize contract
+    // Set Hub's contract CSPR 'deposit' and 'withdrawal' purses
+    let _: () = runtime::call_contract(contract_hash, ENTRY_POINT_INIT, RuntimeArgs::new());
+
     // TODO
-    // Install custom upgradable contract
-
-    let key: Key = runtime::get_key(CONTRACT_KEY_NAME).unwrap_or_revert();
-    let hash: HashAddr = key.into_hash().unwrap_or_revert();
-    let contract_hash = ContractHash::new(hash);
-
-    // "init" function call
-    // To set main CSPR purse of "Hub" contract
-    let _: () = runtime::call_contract(contract_hash, "init", RuntimeArgs::new());
+    // Call versioned contract for ENTRY_POINT_INIT
 
 }
 
@@ -216,14 +222,29 @@ pub extern "C" fn init() {
 // Implementation for next functions
 // Access control
 
-// Administrative functions
+/// Administrative functions
+
+// Set new lock_period value for Liquid Staking Hub contract
 #[no_mangle]
 pub extern "C" fn set_lock_period() {
 
+    // Read new lock_period value from runtime args 
+    let new_lock_period: U512 = runtime::get_named_arg(PROTOCOL_LOCK_PERIOD);
+
+    // Set new key value
+    set_key(PROTOCOL_LOCK_PERIOD, new_lock_period);
+
 }
 
+// Set new protocol_fee value for Liquid Staking Hub contract
 #[no_mangle]
 pub extern "C" fn set_protocol_fee() {
+
+    // Read new protocol_fee value from runtime args 
+    let new_protocol_fee: U512 = runtime::get_named_arg(PROTOCOL_FEE);
+
+    // Set new key value
+    set_key(PROTOCOL_FEE, new_protocol_fee);
 
 }
 
