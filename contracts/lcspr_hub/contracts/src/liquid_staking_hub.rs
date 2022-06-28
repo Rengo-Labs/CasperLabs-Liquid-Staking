@@ -181,51 +181,6 @@ pub extern "C" fn claim() {
 
 }
 
-// Function call:
-// delegate(delegator, validator, amount);
-#[no_mangle]
-fn delegate(delegator: PublicKey, validator: PublicKey, amount: U512) -> U512 {
-    let contract_hash = system::get_auction();
-    let args = runtime_args! {
-        auction::ARG_DELEGATOR => delegator,
-        auction::ARG_VALIDATOR => validator,
-        auction::ARG_AMOUNT => amount,
-    };
-    
-    // Adds a new delegator to delegators or increases its current stake. If the target validator
-    // is missing, the function call returns an error and does nothing.
-    //
-    // The function transfers motes from the source purse to the delegator's bonding purse.
-    //
-    // This entry point returns the number of tokens currently delegated to a given validator.
-    let staked_amount: U512 = runtime::call_contract(contract_hash, METHOD_DELEGATE, args);
-
-    staked_amount
-}
-
-// Function call:
-// undelegate(delegator, validator, amount);
-#[no_mangle]
-fn undelegate(delegator: PublicKey, validator: PublicKey, amount: U512) -> U512 {
-    let contract_hash = system::get_auction();
-    let args = runtime_args! {
-        auction::ARG_DELEGATOR => delegator,
-        auction::ARG_VALIDATOR => validator,
-        auction::ARG_AMOUNT => amount,
-    };
-    
-    // Removes specified amount of motes (or the value from the collection altogether, if the
-    // remaining amount is 0) from the entry in delegators map for given validator and creates a
-    // new unbonding request to the queue.
-    //
-    // The arguments are the delegator's key, the validator's key, and the amount.
-    //
-    // Returns the remaining bid amount after the stake was decreased.
-    let staked_amount: U512 = runtime::call_contract(contract_hash, METHOD_UNDELEGATE, args);
-    
-    staked_amount
-}
-
 #[no_mangle]
 fn call() {
     
@@ -244,9 +199,6 @@ fn call() {
 
 }
 
-// TODO
-// Implement Access control
-// Only for "liquid_staking_hub"
 #[no_mangle]
 pub extern "C" fn init() {
     let value: Option<bool> = get_key("initialized");
