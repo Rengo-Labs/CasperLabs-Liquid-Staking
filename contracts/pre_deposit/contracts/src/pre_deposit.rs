@@ -2,13 +2,11 @@
 
 use casper_contract::{
     contract_api::{account, runtime, system},
-    unwrap_or_revert::UnwrapOrRevert,
+    // unwrap_or_revert::UnwrapOrRevert,
 };
-// use casper_erc20::Address;
 
-use casper_types::RuntimeArgs;
+// use casper_types::RuntimeArgs;
 use casper_types::{runtime_args, ApiError, ContractHash, HashAddr, Key, URef, U512};
-// use casper_types::U256;
 
 pub enum DepositError {
     ExceedUserLimit = 0,
@@ -36,9 +34,9 @@ fn call() {
     // let cspr_amount_u256: U256 = U256::from(cspr_amount.as_u128());
 
     // Staking contract hash address passed as an argument to this contract
-    let wcspr_contract_key: Key = runtime::get_named_arg("liquid_staking_hub_hash_key");
-    let _wcspr_contract_hash: HashAddr = wcspr_contract_key.into_hash().unwrap_or_revert();
-    let wcspr_contract_hash: ContractHash = ContractHash::new(_wcspr_contract_hash);
+    let lcspr_hub_key: Key = runtime::get_named_arg("liquid_staking_hub_hash_key");
+    let _lcspr_hub_hash: HashAddr = lcspr_hub_key.into_hash().unwrap_or_revert();
+    let lcspr_hub_hash: ContractHash = ContractHash::new(_lcspr_hub_hash);
 
     // Get Address (AccountHash) of the user who called the contract
     // let sender: Address = Address::from(runtime::get_caller());
@@ -53,7 +51,7 @@ fn call() {
     let _ = system::transfer_from_purse_to_purse(sender_purse, tmp_purse, cspr_amount, None);
 
     runtime::call_contract(
-        wcspr_contract_hash,
+        lcspr_hub_hash,
         "deposit",
         runtime_args! {
             "tmp_purse" => tmp_purse

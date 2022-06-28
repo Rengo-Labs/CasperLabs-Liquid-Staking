@@ -1,16 +1,15 @@
 [package]
-name = "liquid-staking"
+name = "lcspr_pre_deposit"
 version = "0.1.0"
 edition = "2018"
 
 [dependencies]
 casper-contract = "1.4.4"
-casper-erc20 = { git = "https://github.com/casper-ecosystem/erc20" }
 casper-types = "1.5.0"
 
 [[bin]]
-name = "liquid_staking_hub"
-path = "src/liquid_staking_hub.rs"
+name = "liquid_staking_pre_deposit"
+path = "src/pre_deposit.rs"
 bench = false
 doctest = false
 test = false

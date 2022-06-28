@@ -6,7 +6,7 @@ use casper_types::{
     URef, U512, CLType, CLTyped, EntryPoint, EntryPointAccess, EntryPointType, EntryPoints, Parameter,
 };
 
-// "liquid_staking_hub" entry points
+// Entry point: deposit 
 pub fn deposit() -> EntryPoint {
     EntryPoint::new(
         String::from("deposit"),
@@ -19,6 +19,7 @@ pub fn deposit() -> EntryPoint {
     )
 }
 
+// Entry point: withdraw 
 pub fn withdraw() -> EntryPoint {
     EntryPoint::new(
         String::from("withdraw"),
@@ -31,6 +32,7 @@ pub fn withdraw() -> EntryPoint {
     )
 }
 
+// Entry point: set_lock_period 
 pub fn set_lock_period() -> EntryPoint {
     EntryPoint::new(
         String::from("set_lock_period"),
@@ -43,6 +45,7 @@ pub fn set_lock_period() -> EntryPoint {
     )
 }
 
+// Entry point: set_protocol_fee 
 pub fn set_protocol_fee() -> EntryPoint {
     EntryPoint::new(
         String::from("set_protocol_fee"),
@@ -55,17 +58,18 @@ pub fn set_protocol_fee() -> EntryPoint {
     )
 }
 
-pub fn manual_reward_distribution() -> EntryPoint {
-    EntryPoint::new(
-        String::from("manual_reward_distribution"),
-        // TODO
-        // Update arguements
-        vec![],
-        CLType::Unit,
-        EntryPointAccess::Public,
-        EntryPointType::Contract,
-    )
-}
+// Entry point: manual_reward_distribution 
+// pub fn manual_reward_distribution() -> EntryPoint {
+//     EntryPoint::new(
+//         String::from("manual_reward_distribution"),
+//         // TODO
+//         // Update arguements
+//         vec![],
+//         CLType::Unit,
+//         EntryPointAccess::Public,
+//         EntryPointType::Contract,
+//     )
+// }
 
 pub fn hub_contract_entry_points() -> EntryPoints {
     let mut hub_entry_points = EntryPoints::new();
@@ -73,6 +77,6 @@ pub fn hub_contract_entry_points() -> EntryPoints {
     hub_entry_points.add_entry_point(withdraw());
     hub_entry_points.add_entry_point(set_protocol_fee());
     hub_entry_points.add_entry_point(set_lock_period());
-    hub_entry_points.add_entry_point(manual_reward_distribution());
+    // hub_entry_points.add_entry_point(manual_reward_distribution());
     hub_entry_points
 }

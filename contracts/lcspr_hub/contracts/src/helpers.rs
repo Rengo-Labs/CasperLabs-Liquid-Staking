@@ -10,16 +10,18 @@ use casper_types::CLTyped;
 use casper_types::{system::CallStackElement, Key, URef};
 use core::convert::TryInto;
 
+pub const KEY_DELEGATION_PURSE: &str = "delegation_purse";
+
 // Helper functions
 
-pub fn set_main_purse(purse: URef) {
-    runtime::put_key("main_purse", Key::from(purse))
+pub fn set_delegation_purse(purse: URef) {
+    runtime::put_key(KEY_DELEGATION_PURSE, Key::from(purse))
 }
 
-pub fn get_main_purse() -> URef {
-    let contract_main_purse_key = runtime::get_key("main_purse").unwrap_or_revert();
-    let contract_main_purse = contract_main_purse_key.as_uref().unwrap_or_revert();
-    *contract_main_purse
+pub fn get_delegation_purse() -> URef {
+    let hub_delegation_purse_key = runtime::get_key(KEY_DELEGATION_PURSE).unwrap_or_revert();
+    let hub_delegation_purse = hub_delegation_purse_key.as_uref().unwrap_or_revert();
+    *hub_delegation_purse
 }
 
 pub fn get_key<T: FromBytes + CLTyped>(name: &str) -> Option<T> {

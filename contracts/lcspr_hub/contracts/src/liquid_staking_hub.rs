@@ -12,30 +12,13 @@ extern crate alloc;
 mod entry_points;
 mod helpers;
 
-use crate::helpers::{ get_immediate_caller_address, get_key, get_main_purse, set_key, set_main_purse };
-
-/* 
-use alloc::string::String;
-use core::panic::PanicInfo;
-*/
+use helpers::{ get_immediate_caller_address, get_key, set_key, get_delegation_purse, set_delegation_purse };
 
 use casper_contract::{
     contract_api::{runtime, system},
     unwrap_or_revert::UnwrapOrRevert,
 };
 
-// TODO
-// Filter out unnecessary constatns and types
-/*
-use casper_erc20::{
-    constants::{
-        ADDRESS_RUNTIME_ARG_NAME, AMOUNT_RUNTIME_ARG_NAME, DECIMALS_RUNTIME_ARG_NAME,
-        NAME_RUNTIME_ARG_NAME, OWNER_RUNTIME_ARG_NAME, RECIPIENT_RUNTIME_ARG_NAME,
-        SPENDER_RUNTIME_ARG_NAME, SYMBOL_RUNTIME_ARG_NAME, TOTAL_SUPPLY_RUNTIME_ARG_NAME,
-    },
-    Address, ERC20, Error,
-};
-*/
 use casper_types::{
     runtime_args, system::auction, PublicKey,
     ContractHash, HashAddr, Key, RuntimeArgs,
@@ -43,12 +26,16 @@ use casper_types::{
     Error
 };
 
-const CONTRACT_KEY_NAME: &str = "liquid_staking_hub_contract";
+const CONTRACT_KEY_NAME: &str = "liquid_staking_hub";
 
 // Named constants for Delegation / Undelegation arguments
 const ARG_AMOUNT: &str = "amount";
 const ARG_VALIDATOR: &str = "validator";
 const ARG_DELEGATOR: &str = "delegator";
+const ARG_TMP_PURSE: &str = "tmp_purse";
+
+// Named Keys
+const KEY_CSPR_BALANCE: &str = "cspr_balance";
 
 // Named constant for method `delegate`.
 const METHOD_DELEGATE: &str = "delegate";
@@ -59,22 +46,22 @@ const METHOD_UNDELEGATE: &str = "undelegate";
 pub extern "C" fn deposit() {
     
     // Get staker's temporary purse from pre_deposit contract 
-    let tmp_purse: URef = runtime::get_named_arg("tmp_purse");
+    let tmp_purse: URef = runtime::get_named_arg(ARG_TMP_PURSE);
 
     let cspr_amount: U512 = system::get_purse_balance(tmp_purse).unwrap_or_revert();
     let cspr_amount_u256: U256 = U256::from(cspr_amount.as_u128());
 
-    let contract_main_purse: URef = get_main_purse();
+    let hub_main_purse: URef = get_delegation_purse();
 
-    let main_purse_balance: U512 =
-        system::get_purse_balance(contract_main_purse).unwrap_or_revert();
+    let hub_purse_balance: U512 =
+        system::get_purse_balance(hub_main_purse).unwrap_or_revert();
 
-    // Recieve CSPR from staker into Hub contract
-    let _ = system::transfer_from_purse_to_purse(tmp_purse, contract_main_purse, cspr_amount, None);
+    // Recieve CSPR from staker into Hub delegation purse
+    let _ = system::transfer_from_purse_to_purse(tmp_purse, hub_main_purse, cspr_amount, None);
 
-    let main_purse_balance_after: U512 =
-        system::get_purse_balance(contract_main_purse).unwrap_or_revert();
-    assert_eq!(main_purse_balance + cspr_amount, main_purse_balance_after);
+    let hub_purse_balance_after: U512 =
+        system::get_purse_balance(hub_main_purse).unwrap_or_revert();
+    assert_eq!(hub_purse_balance + cspr_amount, hub_purse_balance_after);
 
     // Get account of the staker who called the contract
     let sender = get_immediate_caller_address().unwrap_or_revert();
@@ -86,7 +73,9 @@ pub extern "C" fn deposit() {
         .unwrap_or_revert();
 
     // Update CSPR balance for Hub contract
-    set_key("cspr_balance", main_purse_balance_after,);
+    set_key(KEY_CSPR_BALANCE, hub_purse_balance_after,);
+
+    // Initiate delegation
     
 }
 
@@ -94,7 +83,7 @@ pub extern "C" fn deposit() {
 pub extern "C" fn withdraw() {
     
     // Amount of CSWAP tokens to withdraw
-    let cspr_amount: U512 = runtime::get_named_arg("cspr_amount");
+    let cspr_amount: U512 = runtime::get_named_arg(ARG_AMOUNT);
     let cspr_amount_u256: U256 = U256::from(cspr_amount.as_u128());
 
     // Get account of a staker who called the contract
@@ -102,18 +91,11 @@ pub extern "C" fn withdraw() {
 
     let balance: U256 = ERC20::default().balance_of(sender);
 
-    let contract_main_purse = get_main_purse();
-    let main_purse_balance: U512 =
-        system::get_purse_balance(contract_main_purse).unwrap_or_revert();
+    let hub_main_purse = get_delegation_purse();
+    let hub_purse_balance: U512 =
+        system::get_purse_balance(hub_main_purse).unwrap_or_revert();
 
-    if balance >= cspr_amount_u256 && cspr_amount <= main_purse_balance {
-        system::transfer_from_purse_to_account(
-            contract_main_purse,
-            *sender.as_account_hash().unwrap_or_revert(),
-            cspr_amount,
-            None,
-        )
-        .unwrap_or_revert();
+    if balance >= cspr_amount_u256 {
         
         // TODO
         // Call "burn" function of ERC20
@@ -121,12 +103,24 @@ pub extern "C" fn withdraw() {
             .burn(sender, cspr_amount_u256)
             .unwrap_or_revert();
 
-        let main_purse_balance_after: U512 =
-            system::get_purse_balance(contract_main_purse).unwrap_or_revert();
-        assert_eq!(main_purse_balance - cspr_amount, main_purse_balance_after);
+    }
+
+    if cspr_amount <= hub_purse_balance {
+        
+        system::transfer_from_purse_to_account(
+            hub_main_purse,
+            *sender.as_account_hash().unwrap_or_revert(),
+            cspr_amount,
+            None,
+        )
+        .unwrap_or_revert();
+
+        let hub_purse_balance_after: U512 =
+            system::get_purse_balance(hub_main_purse).unwrap_or_revert();
+        assert_eq!(hub_purse_balance - cspr_amount, hub_purse_balance_after);
 
         // Update CSPR balance for Hub contract
-        set_key("cspr_balance", main_purse_balance_after,);
+        set_key(KEY_CSPR_BALANCE, hub_purse_balance_after,);
     }
 }
 
@@ -202,7 +196,7 @@ pub extern "C" fn init() {
     match value {
         Some(_) => {}
         None => {
-            set_main_purse(system::create_purse());
+            set_delegation_purse(system::create_purse());
             set_key("initialized", true);
         }
     }
