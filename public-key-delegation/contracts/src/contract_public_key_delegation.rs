@@ -9,8 +9,8 @@ mod data;
 
 use std::str;
 
-use entry_points::ENTRY_POINT_INIT;
-use data::{ get_key, set_key, get_new_public_key };
+use entry_points::{ ENTRY_POINT_INIT, CONTRACT_PUB_KEY, CONTRACT_MAIN_PURSE };
+use data::{ get_key, set_key };
 
 use casper_contract::{ contract_api::{runtime, system, storage}, unwrap_or_revert::UnwrapOrRevert };
 use casper_types::{
@@ -20,9 +20,6 @@ use casper_types::{
 
 const HASH_NAME: &str = "public_key_delegation_contract_hash";
 const UREF_NAME: &str = "public_key_delegation_contract_uref";
-
-const PUBLIC_KEY: &str = "contract_public_key";
-const CONTRACT_PURSE: &str = "contract_main_purse";
 const INIT: &str = "initialized";
 
 pub extern "C" fn delegate_to() {
@@ -32,7 +29,7 @@ pub extern "C" fn delegate_to() {
     let amount: U512 = runtime::get_named_arg(auction::ARG_AMOUNT);
 
     // Get contract's public key from the context's NamedKeys
-    let delegator: PublicKey = get_key(PUBLIC_KEY).unwrap_or_revert();
+    let delegator: PublicKey = get_key(CONTRACT_PUB_KEY).unwrap_or_revert();
     
     // Call delegation function
     delegate(delegator, validator, amount);
@@ -56,7 +53,7 @@ pub extern "C" fn undelegate_from() {
     let amount: U512 = runtime::get_named_arg(auction::ARG_AMOUNT);
 
     // Get contract's public key from the context's NamedKeys
-    let delegator: PublicKey = get_key(PUBLIC_KEY).unwrap_or_revert();
+    let delegator: PublicKey = get_key(CONTRACT_PUB_KEY).unwrap_or_revert();
     
     // Call delegation function
     undelegate(delegator, validator, amount);
@@ -81,13 +78,15 @@ pub extern "C" fn initialize_contract() {
         Some(_) => {}
         None => {
             
-            // Generate Contract's PublicKey
+            // Read PublicKey from runtime args
+            let new_public_key: PublicKey = runtime::get_named_arg(CONTRACT_PUB_KEY);
+
             // Save values into NamedKeys
-            set_contracts_public_key();
+            set_key(CONTRACT_PUB_KEY, new_public_key);
     
             // Create CSPR MainPurse for the contract
             // Save MainPurse into NamedKeys
-            set_main_purse();
+            set_key(CONTRACT_PURSE, system::create_purse());
             
             // Make contract being initialized
             set_key(INIT, true);
@@ -97,26 +96,35 @@ pub extern "C" fn initialize_contract() {
 
 }
 
-fn set_contracts_public_key() {
+pub extern "C" fn set_public_key() {
     
-    let contracts_public_key = get_new_public_key();
-    set_key(PUBLIC_KEY, contracts_public_key);
-    
-    // let account_hash: AccountHash = public_key.to_account_hash();
-    // set_key(ACCOUNT_HASH, account_hash);
+    // TODO
+    // Check ownership
 
-    // let public_key_hex: String = public_key.to_hex();
-    // set_key(PUBLIC_KEY_HEX, public_key_hex);
+    // Read PublicKey from runtime args
+    let new_public_key: PublicKey = runtime::get_named_arg(CONTRACT_PUB_KEY);
+
+    // Save values into NamedKeys
+    set_key(CONTRACT_PUB_KEY, new_public_key);
 
 }
 
-fn set_main_purse() {
+pub extern "C" fn set_main_purse() {
+
+    // TODO
+    // Check ownership
+
+    // Read Purse to set from runtime args
+    let new_contract_purse: URef = runtime::get_named_arg(CONTRACT_MAIN_PURSE);
     
-    set_key(CONTRACT_PURSE, system::create_purse());
+    set_key(CONTRACT_MAIN_PURSE, system::create_purse());
 
 }
 
 fn call() {
+
+    // Read PublicKey from runtime args
+    let new_public_key: PublicKey = runtime::get_named_arg(PUBLIC_KEY);
     
     // Entry points
     let entry_points: EntryPoints = entry_points::get_entry_points();
@@ -128,18 +136,23 @@ fn call() {
     let (contract_hash, contract_version) = storage::new_contract(entry_points, Some(named_keys), Some(HASH_NAME.to_string()), Some(UREF_NAME.to_string()));
 
     // Runtime arguments for "initialize_contract" function
-    let runtime_arguments: RuntimeArgs = RuntimeArgs::new();
+    // let runtime_arguments: RuntimeArgs = RuntimeArgs::new();
+    let args = runtime_args! {
+        CONTRACT_PUB_KEY => new_public_key,
+    };
 
     // Initialize contract
-    // Set CSPR MainPurse and PublicKey for the contract
-    // TODO call versioned contract
-    let _: () = runtime::call_contract(contract_hash, ENTRY_POINT_INIT, runtime_arguments);
+    // Set PublicKey for the contract
+    let _: () = runtime::call_contract(contract_hash, ENTRY_POINT_INIT, args);
+
+    // TODO 
+    // Call versioned contract instead
     
 }
 
 // fn get_main_purse() -> URef {
     
-//     let contract_main_purse_key = runtime::get_key(CONTRACT_PURSE).unwrap_or_revert();
+//     let contract_main_purse_key = runtime::get_key(CONTRACT_MAIN_PURSE).unwrap_or_revert();
 //     let contract_main_purse = contract_main_purse_key.as_uref().unwrap_or_revert();
 //     *contract_main_purse
 

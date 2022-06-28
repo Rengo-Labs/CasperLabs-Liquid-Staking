@@ -41,13 +41,3 @@ fn random_bytes() -> [u8; RANDOM_BYTES_COUNT] {
     api_error::result_from(result).unwrap_or_revert();
     ret
 }
-
-pub fn get_new_public_key() -> PublicKey {
-
-    let bytes = random_bytes();
-    let sec_key: SecretKey = SecretKey::ed25519_from_bytes(bytes);
-    let pub_key: PublicKey = PublicKey::from(sec_key);
-
-    pub_key
-
-}
