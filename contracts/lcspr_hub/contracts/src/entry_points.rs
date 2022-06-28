@@ -32,6 +32,19 @@ pub fn withdraw() -> EntryPoint {
     )
 }
 
+// Entry point: claim 
+pub fn claim() -> EntryPoint {
+    EntryPoint::new(
+        String::from("claim"),
+        vec![
+            Parameter::new("cspr_amount", U512::cl_type()),
+        ],
+        CLType::Unit,
+        EntryPointAccess::Public,
+        EntryPointType::Contract,
+    )
+}
+
 // Entry point: set_lock_period 
 pub fn set_lock_period() -> EntryPoint {
     EntryPoint::new(
@@ -75,6 +88,7 @@ pub fn hub_contract_entry_points() -> EntryPoints {
     let mut hub_entry_points = EntryPoints::new();
     hub_entry_points.add_entry_point(deposit());
     hub_entry_points.add_entry_point(withdraw());
+    hub_entry_points.add_entry_point(claim());
     hub_entry_points.add_entry_point(set_protocol_fee());
     hub_entry_points.add_entry_point(set_lock_period());
     // hub_entry_points.add_entry_point(manual_reward_distribution());

@@ -39,7 +39,8 @@ const ARG_DELEGATOR: &str = "delegator";
 const ARG_TMP_PURSE: &str = "tmp_purse";
 
 // Named Keys
-const KEY_CSPR_BALANCE: &str = "cspr_balance";
+const KEY_DELEGATION_BALANCE: &str = "delegation_purse_balance";
+const KEY_WITHDRAW_BALANCE: &str = "withdraw_purse_balance";
 
 // Named constant for method `delegate`.
 const METHOD_DELEGATE: &str = "delegate";
@@ -52,47 +53,56 @@ pub extern "C" fn deposit() {
     // Get staker's temporary purse from pre_deposit contract 
     let tmp_purse: URef = runtime::get_named_arg(ARG_TMP_PURSE);
 
+    // Read staker's balance on temporary purse
     let cspr_amount: U512 = system::get_purse_balance(tmp_purse).unwrap_or_revert();
     let cspr_amount_u256: U256 = U256::from(cspr_amount.as_u128());
 
-    let hub_main_purse: URef = get_delegation_purse();
+    // Get hub contract's purse to make delegations from
+    let hub_delegation_purse: URef = get_delegation_purse();
 
-    let hub_purse_balance: U512 =
-        system::get_purse_balance(hub_main_purse).unwrap_or_revert();
+    // Read balance of delegation purse
+    let hub_delegation_balance: U512 =
+        system::get_purse_balance(hub_delegation_purse).unwrap_or_revert();
 
-    // Recieve CSPR from staker into Hub delegation purse
-    let _ = system::transfer_from_purse_to_purse(tmp_purse, hub_main_purse, cspr_amount, None);
+    // Recieve CSPR from staker into hub delegation purse
+    let _ = system::transfer_from_purse_to_purse(tmp_purse, hub_delegation_purse, cspr_amount, None);
 
-    let hub_purse_balance_after: U512 =
-        system::get_purse_balance(hub_main_purse).unwrap_or_revert();
-    assert_eq!(hub_purse_balance + cspr_amount, hub_purse_balance_after);
+    // Check balances after transfer
+    let hub_delegation_balance_after: U512 =
+        system::get_purse_balance(hub_delegation_purse).unwrap_or_revert();
+    assert_eq!(hub_delegation_balance + cspr_amount, hub_delegation_balance_after);
 
     // Get account of the staker who called the contract
     let sender = get_immediate_caller_address().unwrap_or_revert();
 
+    // Mint lCSPR for sender 
     // TODO
     // Call "mint" function of ERC20
     ERC20::default()
         .mint(sender, cspr_amount_u256)
         .unwrap_or_revert();
 
-    // Update CSPR balance for Hub contract
-    set_key(KEY_CSPR_BALANCE, hub_purse_balance_after,);
+    // Update CSPR balance of Hub's delegation purse
+    set_key(KEY_DELEGATION_BALANCE, hub_delegation_balance_after);
 
     // Initiate delegation
+
+    // Let user get rewards in lCSPR after delegation
     
 }
 
+// Initiate withdrawal of CSPR tokens from liquid_staking_protocol
 #[no_mangle]
 pub extern "C" fn withdraw() {
     
-    // Amount of CSWAP tokens to withdraw
+    // Amount of CSPR tokens to withdraw
     let cspr_amount: U512 = runtime::get_named_arg(ARG_AMOUNT);
     let cspr_amount_u256: U256 = U256::from(cspr_amount.as_u128());
 
     // Get account of a staker who called the contract
     let sender = get_immediate_caller_address().unwrap_or_revert();
 
+    // Check balance of liquid staker
     let balance: U256 = ERC20::default().balance_of(sender);
 
     let hub_main_purse = get_delegation_purse();
@@ -124,8 +134,51 @@ pub extern "C" fn withdraw() {
         assert_eq!(hub_purse_balance - cspr_amount, hub_purse_balance_after);
 
         // Update CSPR balance for Hub contract
-        set_key(KEY_CSPR_BALANCE, hub_purse_balance_after,);
+        set_key(KEY_CSPR_BALANCE, hub_purse_balance_after);
     }
+}
+
+#[no_mangle]
+pub extern "C" fn claim() {
+    
+    // Read CSPR amount to claim
+    let cspr_amount: U512 = runtime::get_named_arg(ARG_AMOUNT);
+
+    // Get Hub's withdraw purse key
+    let hub_withdraw_purse = get_withdraw_purse();
+    
+    // Read Hub's withdraw purse balance
+    let hub_withdraw_balance: U512 =
+        system::get_purse_balance(hub_withdraw_purse).unwrap_or_revert();
+
+    // Get account of a staker who called claim method
+    let sender = get_immediate_caller_address().unwrap_or_revert();
+
+    // Check that staker passed locked period
+
+    // Checl that staker has CSPR tokens to claim
+    
+    // Check that amount to claim is equal or lower then balance of Hub's withdrawal purse
+    if cspr_amount <= hub_withdraw_balance {
+        
+        // Transfer CSPR to staker
+        system::transfer_from_purse_to_account(
+            hub_withdraw_purse,
+            *sender.as_account_hash().unwrap_or_revert(),
+            cspr_amount,
+            None,
+        )
+        .unwrap_or_revert();
+
+        // Check balances after transfer
+        let hub_withdraw_balance_after: U512 =
+            system::get_purse_balance(hub_withdraw_purse).unwrap_or_revert();
+        assert_eq!(hub_withdraw_balance - cspr_amount, hub_withdraw_balance_after);
+
+        // Update CSPR balance for Hub's withdraw contract
+        set_key(KEY_WITHDRAW_BALANCE, hub_withdraw_balance_after);
+    }
+
 }
 
 // Function call:
