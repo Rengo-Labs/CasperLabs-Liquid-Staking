@@ -12,7 +12,11 @@ extern crate alloc;
 mod entry_points;
 mod helpers;
 
-use helpers::{ get_immediate_caller_address, get_key, set_key, get_delegation_purse, set_delegation_purse };
+use helpers::{
+    get_immediate_caller_address, get_key, set_key,
+    get_delegation_purse, set_delegation_purse,
+    get_withdraw_purse, set_withdraw_purse,
+};
 
 use casper_contract::{
     contract_api::{runtime, system},
@@ -197,6 +201,7 @@ pub extern "C" fn init() {
         Some(_) => {}
         None => {
             set_delegation_purse(system::create_purse());
+            set_withdraw_purse(system::create_purse());
             set_key("initialized", true);
         }
     }

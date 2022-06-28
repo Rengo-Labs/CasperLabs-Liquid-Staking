@@ -11,6 +11,7 @@ use casper_types::{system::CallStackElement, Key, URef};
 use core::convert::TryInto;
 
 pub const KEY_DELEGATION_PURSE: &str = "delegation_purse";
+pub const KEY_WITHDRAW_PURSE: &str = "withdraw_purse";
 
 // Helper functions
 
@@ -22,6 +23,16 @@ pub fn get_delegation_purse() -> URef {
     let hub_delegation_purse_key = runtime::get_key(KEY_DELEGATION_PURSE).unwrap_or_revert();
     let hub_delegation_purse = hub_delegation_purse_key.as_uref().unwrap_or_revert();
     *hub_delegation_purse
+}
+
+pub fn set_withdraw_purse(purse: URef) {
+    runtime::put_key(KEY_WITHDRAW_PURSE, Key::from(purse))
+}
+
+pub fn get_withdraw_purse() -> URef {
+    let hub_withdraw_purse_key = runtime::get_key(KEY_WITHDRAW_PURSE).unwrap_or_revert();
+    let hub_withdraw_purse = hub_withdraw_purse_key.as_uref().unwrap_or_revert();
+    *hub_withdraw_purse
 }
 
 pub fn get_key<T: FromBytes + CLTyped>(name: &str) -> Option<T> {
