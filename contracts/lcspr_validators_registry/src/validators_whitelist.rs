@@ -1,8 +1,3 @@
-// TODO 
-// Adjust to Casper network
-// LIDO's mappings
-// pub static REGISTRY: Map<&[u8], Validator> = Map::new("validators_registry");
-
 pub struct Validator {
     pub address: PublicKey,
     
@@ -138,20 +133,8 @@ pub extern "C" fn update_config(hub_contract_public_key: PublicKey, hub_contract
 // TODO
 // Re-work function
 fn get_validator(validator: PublicKey) -> Option<Validator, Error> {
+    //
 }
-
-/*
-fn get_validator(validator: PublicKey) -> Option<Validator, Error> {
-
-    let _validator: Validator = {
-        address = validator,
-        whitelisted = true,
-        total_delegated =  U512::from(0),
-        undelegating =U512::from(0),
-        unlock_deadline: u8::from(0),
-    };
-}
-*/
 
 #[no_mangle]
 pub extern "C" fn add_validators(validator: PublicKey) {
@@ -176,9 +159,76 @@ pub extern "C" fn remove_validators(validator: PublicKey) -> Validator {
 
     // Check Validator's "undelegating" amount and lock period
 
-    // Return Validator struct iff undelegating > 0
+    // Return Validator struct if undelegating > 0
 
     // Remove Validator from whitelist
+
+    REGISTRY.remove(deps.storage, validator_address.as_str().as_bytes());
+
+    let mut validators = query_validators(deps.as_ref())?;
+    if validators.is_empty() {
+        return Err(StdError::generic_err(
+            "Cannot remove the last validator in the registry",
+        ));
+    }
+    validators.sort_by(|v1, v2| v1.total_delegated.cmp(&v2.total_delegated));
+
+    let hub_address = deps.api.addr_humanize(&config.hub_contract)?;
+
+    let query = deps
+        .querier
+        .query_delegation(hub_address.clone(), validator_address.clone());
+
+    let mut messages: Vec<CosmosMsg> = vec![];
+    if let Ok(q) = query {
+        let delegated_amount = q;
+
+        let mut redelegations: Vec<(String, Coin)> = vec![];
+        if let Some(delegation) = delegated_amount {
+            // Terra core returns zero if there is another active redelegation
+            // That means we cannot start a new redelegation, so we only remove a validator from
+            // the registry.
+            // We'll do a redelegation manually later by sending RedelegateProxy to the hub
+            if delegation.can_redelegate.amount < delegation.amount.amount {
+                return StdResult::Ok(Response::new());
+            }
+
+            let (_, delegations) =
+                calculate_delegations(delegation.amount.amount, validators.as_slice())?;
+
+            for i in 0..delegations.len() {
+                if delegations[i].is_zero() {
+                    continue;
+                }
+                redelegations.push((
+                    validators[i].address.clone(),
+                    Coin::new(delegations[i].u128(), delegation.amount.denom.as_str()),
+                ));
+            }
+
+            let regelegate_msg = RedelegateProxy {
+                src_validator: validator_address,
+                redelegations,
+            };
+            messages.push(CosmosMsg::Wasm(WasmMsg::Execute {
+                contract_addr: hub_address.clone().into_string(),
+                msg: to_binary(&regelegate_msg)?,
+                funds: vec![],
+            }));
+
+            let msg = UpdateGlobalIndex {
+                airdrop_hooks: None,
+            };
+            messages.push(CosmosMsg::Wasm(WasmMsg::Execute {
+                contract_addr: hub_address.into_string(),
+                msg: to_binary(&msg)?,
+                funds: vec![],
+            }));
+        }
+    }
+
+    let res = Response::new().add_messages(messages);
+    Ok(res)
 
 }
 

@@ -17,6 +17,7 @@ pub const KEY_WITHDRAW_PURSE: &str = "withdraw_purse";
 
 pub fn set_delegation_purse(purse: URef) {
     runtime::put_key(KEY_DELEGATION_PURSE, Key::from(purse))
+    // runtime::put_key(KEY_DELEGATION_PURSE, purse.into())
 }
 
 pub fn get_delegation_purse() -> URef {
@@ -27,6 +28,7 @@ pub fn get_delegation_purse() -> URef {
 
 pub fn set_withdraw_purse(purse: URef) {
     runtime::put_key(KEY_WITHDRAW_PURSE, Key::from(purse))
+    // runtime::put_key(KEY_WITHDRAW_PURSE, purse.into())
 }
 
 pub fn get_withdraw_purse() -> URef {

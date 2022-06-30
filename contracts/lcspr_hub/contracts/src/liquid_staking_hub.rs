@@ -46,6 +46,7 @@ const KEY_WITHDRAW_BALANCE: &str = "withdraw_purse_balance";
 
 #[no_mangle]
 pub extern "C" fn deposit() {
+    
     // Get staker's temporary purse from pre_deposit contract
     let tmp_purse: URef = runtime::get_named_arg(ARG_TMP_PURSE);
 
@@ -61,8 +62,7 @@ pub extern "C" fn deposit() {
         system::get_purse_balance(hub_delegation_purse).unwrap_or_revert();
 
     // Recieve CSPR from staker into hub delegation purse
-    let _ =
-        system::transfer_from_purse_to_purse(tmp_purse, hub_delegation_purse, cspr_amount, None);
+    let _ = system::transfer_from_purse_to_purse(tmp_purse, hub_delegation_purse, cspr_amount, None);
 
     // Check balances after transfer
     let hub_delegation_balance_after: U512 =
@@ -76,8 +76,6 @@ pub extern "C" fn deposit() {
     let sender = get_immediate_caller_address().unwrap_or_revert();
 
     // Mint lCSPR for sender
-    // TODO
-    // Call "mint" function of ERC20
     ERC20::default()
         .mint(sender, cspr_amount_u256)
         .unwrap_or_revert();
@@ -106,35 +104,28 @@ pub extern "C" fn withdraw() {
     // Check balance of liquid staker
     let balance: U256 = ERC20::default().balance_of(sender);
 
+    // Check Hub's Delegation purse balance
     let hub_main_purse = get_delegation_purse();
     let hub_purse_balance: U512 = system::get_purse_balance(hub_main_purse).unwrap_or_revert();
 
     if balance >= cspr_amount_u256 {
+        
         // TODO
         // Call "burn" function of ERC20
         ERC20::default()
             .burn(sender, cspr_amount_u256)
             .unwrap_or_revert();
+
+        // Initiate undelegation
+        
+        
     }
 
-    if cspr_amount <= hub_purse_balance {
-        system::transfer_from_purse_to_account(
-            hub_main_purse,
-            *sender.as_account_hash().unwrap_or_revert(),
-            cspr_amount,
-            None,
-        )
-        .unwrap_or_revert();
-
-        let hub_purse_balance_after: U512 =
-            system::get_purse_balance(hub_main_purse).unwrap_or_revert();
-        assert_eq!(hub_purse_balance - cspr_amount, hub_purse_balance_after);
-
-        // Update CSPR balance for Hub contract
-        set_key(KEY_CSPR_BALANCE, hub_purse_balance_after);
-    }
+    
 }
 
+// TODO
+// Move to "Reward_dispatcher"
 #[no_mangle]
 pub extern "C" fn claim() {
     // Read CSPR amount to claim
@@ -148,16 +139,19 @@ pub extern "C" fn claim() {
         system::get_purse_balance(hub_withdraw_purse).unwrap_or_revert();
 
     // Get account of a staker who called claim method
-    let sender = get_immediate_caller_address().unwrap_or_revert();
+    let liquid_staker = get_immediate_caller_address().unwrap_or_revert();
+
+    // Get available CSPR tokens to claim
+    let available_cspr: U512 = get_available_cspr_to_claim(liquid_staker);
 
     // Check that staker passed locked period
-    if !lock_period_check(sender) {
+    if !lock_period_check(liquid_staker) {
 
         // Stop execution
     }
 
     // Check that staker has CSPR tokens to claim
-    if !claim_token_check(sender, cspr_amount) {
+    if !claim_token_check(liquid_staker, cspr_amount) {
 
         // Stop execution
     }
@@ -167,7 +161,7 @@ pub extern "C" fn claim() {
         // Transfer CSPR to staker
         system::transfer_from_purse_to_account(
             hub_withdraw_purse,
-            *sender.as_account_hash().unwrap_or_revert(),
+            *liquid_staker.as_account_hash().unwrap_or_revert(),
             cspr_amount,
             None,
         )
@@ -183,6 +177,7 @@ pub extern "C" fn claim() {
 
         // Update CSPR balance for Hub's withdraw contract
         set_key(KEY_WITHDRAW_BALANCE, hub_withdraw_balance_after);
+    }
     }
 }
 
@@ -235,7 +230,7 @@ fn call() {
 
     // TODO
     // Call versioned contract for ENTRY_POINT_INIT
-    
+
 }
 
 #[no_mangle]
@@ -260,21 +255,25 @@ pub extern "C" fn init() {
 // Set new lock_period value for Liquid Staking Hub contract
 #[no_mangle]
 pub extern "C" fn set_lock_period() {
+    
     // Read new lock_period value from runtime args
     let new_lock_period: U512 = runtime::get_named_arg(PROTOCOL_LOCK_PERIOD);
 
     // Set new key value
     set_key(PROTOCOL_LOCK_PERIOD, new_lock_period);
+
 }
 
 // Set new protocol_fee value for Liquid Staking Hub contract
 #[no_mangle]
 pub extern "C" fn set_protocol_fee() {
+    
     // Read new protocol_fee value from runtime args
     let new_protocol_fee: U512 = runtime::get_named_arg(PROTOCOL_FEE);
 
     // Set new key value
     set_key(PROTOCOL_FEE, new_protocol_fee);
+
 }
 
 #[no_mangle]
@@ -294,7 +293,68 @@ fn distribute_rewards() {}
 // pub extern "C" fn manual_reward_distribution() {
 // }
 
-fn lock_period_check(Address: sender) -> bool {
+fn get_available_cspr_to_claim(Address: staker) -> U512 {
+
+    // Read STAKERS_WITHDRAWALS_REGISTRY
+    // liquid_staker -> withdrawa_instances
+    get
+
+    // Read WITHDRAW_INSTANCES_REGISTRY
+    // Iterate withdrawa_instances -> Amount + Unlock_date
+    // Calculate available amounts
+
+    // Return available amount
+}
+
+fn request_cspr_withdrawal(Address: staker, U512: amount) {
+    
+    // Get STAKERS_WITHDRAWALS_REGISTRY URef
+    let withdrawals_reg_uref: URef = get_uref(STAKERS_WITHDRAWALS_REGISTRY);
+
+    // Get WITHDRAW_INSTANCES_REGISTRY URef
+    let withd_instances_reg_uref: URef = get_uref(WITHDRAW_INSTANCES_REGISTRY);
+
+    // Example of new URef -> Key -> NamedKey
+    runtime::put_key(ALLOW_MINTING, storage::new_uref(allow_minting).into());
+    
+    let contract_whitelist = get_named_arg_with_user_errors::<Vec<ContractHash>>(
+        ARG_CONTRACT_WHITELIST,
+        NFTCoreError::MissingContractWhiteList,
+        NFTCoreError::InvalidContractWhitelist,
+    )
+    .unwrap_or_revert();
+    
+        runtime::put_key(
+        CONTRACT_WHITELIST,
+        storage::new_uref(contract_whitelist).into(),
+    );
+
+    // Get current timestamp
+    
+    // Read protocol's lock period
+    //
+
+    // Put 
+    sotrage::dictionary_put(WITHDRAW_INSTANCES_REGISTRY, staker, amount)
+}
+
+// TODO
+// Add ApiError into fn args
+fn get_uref(name: &str) -> URef {
+    
+    let key = runtime::get_key(name)
+        .ok_or(ApiError::MissingKey)
+        .unwrap_or_revert();
+    key.try_into().unwrap_or_revert()
+
+    // let ledger_seed_uref = *runtime::get_key(name)
+    // .unwrap_or_revert_with(ApiError::MissingKey)
+    //     .as_uref()
+    //     .unwrap_or_revert();
+
+}
+
+// fn lock_period_check(Address: sender) -> bool {
 
     // Read DICT_LOCK_PERIODS for sender
 
@@ -303,9 +363,9 @@ fn lock_period_check(Address: sender) -> bool {
     // Get current block_time
 
     // Check that sender passed required lock_period
-}
+// }
 
-fn claim_token_check(Address: sender, U512: cspr_amount) {
+// fn claim_token_check(Address: sender, U512: cspr_amount) {
 
     //
-}
+// }

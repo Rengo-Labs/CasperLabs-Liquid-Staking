@@ -94,12 +94,12 @@ pub fn init() -> EntryPoint {
 }
 
 pub fn hub_contract_entry_points() -> EntryPoints {
-    let mut hub_entry_points = EntryPoints::new();
-    hub_entry_points.add_entry_point(deposit());
-    hub_entry_points.add_entry_point(withdraw());
-    hub_entry_points.add_entry_point(claim());
-    hub_entry_points.add_entry_point(set_protocol_fee());
-    hub_entry_points.add_entry_point(set_lock_period());
-    hub_entry_points.add_entry_point(init());
-    hub_entry_points
+    let mut entry_points = EntryPoints::new();
+    entry_points.add_entry_point(deposit());
+    entry_points.add_entry_point(withdraw());
+    entry_points.add_entry_point(claim());
+    entry_points.add_entry_point(set_protocol_fee());
+    entry_points.add_entry_point(set_lock_period());
+    entry_points.add_entry_point(init());
+    entry_points
 }
